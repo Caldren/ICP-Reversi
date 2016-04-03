@@ -2,6 +2,7 @@
 #include <exception>
 #include "Board.hpp"
 #include "Game.hpp"
+#include "Player.hpp"
 
 using namespace std;
 
@@ -61,4 +62,14 @@ void board_tests()
     }
 
     cout << c;
+
+    Player p("Test", Color::WHITE);
+    cout << p.getName() << ": " << p.getScore() << endl;
+    p += 1;
+    cout << p.getName() << ": " << p.getScore() << endl;
+    p--;
+    p--;
+    cout << p.getName() << ": " << p.getScore() << endl;
+
+
 }

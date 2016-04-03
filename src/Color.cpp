@@ -12,6 +12,8 @@ void Color::setColor(int color)
     if(!isValid(color))
         throw std::invalid_argument("Invalid color - must be: "
                                     "BLACK, EMPTY or WHITE");
+
+    m_color = color;
 }
 
 int Color::getColor()

@@ -3,8 +3,6 @@
 #include <stdexcept>
 #include "Board.hpp"
 
-using namespace std;
-
 Board::Board(int size)
 {
     initBoard(size);
@@ -43,15 +41,15 @@ void Board::setField(int x, int y, int val)
     m_board[x][y] = val;
 }
 
-ostream& operator<<(ostream &out, const Board &b)
+std::ostream& operator<<(std::ostream &out, const Board &b)
 {
     if(b.m_board != nullptr) {
         for(int row = 0; row < b.m_size; row++) {
             for(int col = 0; col < b.m_size; col++) {
-                out << setw(2) << (char)b.m_board[row][col] << " ";
+                out << std::setw(2) << (char)b.m_board[row][col] << " ";
             }
 
-            out << endl;
+            out << std::endl;
         }
     }
 
