@@ -7,12 +7,17 @@
 using namespace std;
 
 void board_tests();
+void player_tests();
 
 int main(void)
 {
     board_tests();
+    player_tests();
 
-    Game g(2);
+    Game g;
+    g.addPlayer("Test1");
+    g.addPlayer("test2");
+    g.addPlayer("test2");
 
     return 0;
 }
@@ -62,14 +67,16 @@ void board_tests()
     }
 
     cout << c;
+}
 
-    Player p("Test", Color::WHITE);
-    cout << p.getName() << ": " << p.getScore() << endl;
+void player_tests()
+{
+    Player p("Test", Color::WHITE, Player::HUMAN);
+    cout << p.getName() 
+          << ": " << p.getScore() << endl;
     p += 1;
     cout << p.getName() << ": " << p.getScore() << endl;
     p--;
     p--;
     cout << p.getName() << ": " << p.getScore() << endl;
-
-
 }
