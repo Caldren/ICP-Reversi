@@ -1,10 +1,22 @@
 #include <iostream>
 #include <exception>
 #include "Board.hpp"
+#include "Game.hpp"
 
 using namespace std;
 
+void board_tests();
+
 int main(void)
+{
+    board_tests();
+
+    Game g(2);
+
+    return 0;
+}
+
+void board_tests()
 {
     try {
         Board a(5);
@@ -12,15 +24,6 @@ int main(void)
         exit(100);
     } catch(exception &e) {
         cout << "[TEST PASS] " << e.what() << endl;
-    }
-
-    Board b;
-    if(b.getSize() != 8) {
-        cerr << "[TEST FAIL] Board size should be 8 (is "
-             << b.getSize() << ")" << endl;
-        exit(100);
-    } else {
-        cout << "[TEST PASS] Default board size is 8" << endl;
     }
 
     Board c(12);
@@ -57,5 +60,5 @@ int main(void)
         cout << "[TEST PASS] " << e.what() << endl;
     }
 
-    return 0;
+    cout << c;
 }

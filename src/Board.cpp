@@ -5,11 +5,6 @@
 
 using namespace std;
 
-Board::Board()
-{
-    initBoard(DEFAULT_SIZE);
-}
-
 Board::Board(int size)
 {
     initBoard(size);
@@ -17,44 +12,43 @@ Board::Board(int size)
 
 Board::~Board()
 {
-    for(int i = 0; i < size; i++)
-        delete [] board[i];
+    for(int i = 0; i < m_size; i++)
+        delete [] m_board[i];
 
-    delete [] board;
-    board = nullptr;
+    delete [] m_board;
+    m_board = nullptr;
 }
 
 int Board::getSize()
 {
-    return size;
+    return m_size;
 }
 
 int Board::getField(int x, int y)
 {
-    if(x < 0 || x >= size || y < 0 || y >= size)
+    if(x < 0 || x >= m_size || y < 0 || y >= m_size)
         throw std::range_error("Field coordinates are out of range");
 
-    return board[x][y];
+    return m_board[x][y];
 }
 
 void Board::setField(int x, int y, int val)
 {
-    if(x < 0 || x >= size || y < 0 || y >= size)
+    if(x < 0 || x >= m_size || y < 0 || y >= m_size)
         throw std::range_error("Field coordinates are out of range");
 
-    if(val != BLACK && val != EMPTY && val != WHITE)
-        throw std::invalid_argument("Invalid field value - must be: "
-                                    "BLACK, EMPTY or WHITE");
+    if(!Color::isValid(val))
+        throw std::invalid_argument("Invalid color");
 
-    board[x][y] = val;
+    m_board[x][y] = val;
 }
 
 ostream& operator<<(ostream &out, const Board &b)
 {
-    if(b.board != nullptr) {
-        for(int row = 0; row < b.size; row++) {
-            for(int col = 0; col < b.size; col++) {
-                out << setw(2) << (char)b.board[row][col] << " ";
+    if(b.m_board != nullptr) {
+        for(int row = 0; row < b.m_size; row++) {
+            for(int col = 0; col < b.m_size; col++) {
+                out << setw(2) << (char)b.m_board[row][col] << " ";
             }
 
             out << endl;
@@ -70,7 +64,7 @@ void Board::setSize(int size)
     if(SIZES.find(size) == SIZES.end())
         throw std::range_error("Size must be 6, 8, 10 or 12");
 
-    this->size = size;
+    m_size = size;
 }
 
 void Board::initBoard(int size)
@@ -81,11 +75,10 @@ void Board::initBoard(int size)
 
 void Board::initBoardArray()
 {
-    board = new int*[size];
+    m_board = new Color*[m_size];
 
-    for(int i = 0; i < size; i++) {
-        board[i] = new int[size];
-        std::fill_n(board[i], size, EMPTY);
+    for(int i = 0; i < m_size; i++) {
+        m_board[i] = new Color[m_size];
     }
 }
 

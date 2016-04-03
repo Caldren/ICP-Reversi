@@ -3,10 +3,10 @@
 
 #include <iostream>
 #include <set>
+#include "Color.hpp"
 
 class Board {
 public:
-    Board();
     Board(int size);
     ~Board();
 
@@ -16,21 +16,15 @@ public:
     void setField(int x, int y, int val);
 
     friend std::ostream &operator<<(std::ostream &out, const Board &b);
-    enum FieldState {
-        BLACK = 'B',
-        EMPTY = 'E',
-        WHITE = 'W',
-    };
 private:
     void setSize(int size);
     void initBoard(int size);
     void initBoardArray();
 
 private:
-    static const int DEFAULT_SIZE = 8;
     static const std::set<int> SIZES;
-    int size;
-    int **board = nullptr;
+    int m_size;
+    Color **m_board = nullptr;
 };
 
 #endif
