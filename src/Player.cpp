@@ -47,22 +47,22 @@ void Player::setScore(int score)
         m_score = score;
 }
 
-const std::string &Player::getName()
+const std::string &Player::getName() const
 {
     return m_name;
 }
 
-int Player::getColor()
+int Player::getColor() const
 {
     return m_color;
 }
 
-int Player::getType()
+int Player::getType() const
 {
     return m_type;
 }
 
-int Player::getScore()
+int Player::getScore() const
 {
     return m_score;
 }

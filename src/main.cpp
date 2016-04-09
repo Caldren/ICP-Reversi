@@ -17,7 +17,9 @@ int main(void)
     Game g;
     g.addPlayer("Test1");
     g.addPlayer("test2");
-    g.addPlayer("test2");
+
+    cout << g.getP1()->getName() << endl;
+    cout << g.getP2()->getName() << endl;
 
     return 0;
 }

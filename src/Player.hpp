@@ -14,10 +14,10 @@ public:
     void setType(int type);
     void setScore(int score);
 
-    const std::string &getName();
-    int getColor();
-    int getType();
-    int getScore();
+    const std::string &getName() const;
+    int getColor() const;
+    int getType() const;
+    int getScore() const;
 
     int operator+(int x);
     int operator-(int x);
