@@ -14,13 +14,28 @@ int main(void)
     board_tests();
     player_tests();
 
-    Game g;
+    Game g(8);
     g.addPlayer("Test1");
     g.addPlayer("test2");
 
     cout << g.getP1()->getName() << endl;
     cout << g.getP2()->getName() << endl;
 
+    int m[8][8] = {
+        { 'E', 'E', 'E', 'E', 'B', 'B', 'B', 'E' },
+        { 'E', 'E', 'E', 'W', 'W', 'W', 'B', 'E' },
+        { 'E', 'E', 'E', 'W', 'E', 'W', 'B', 'E' },
+        { 'E', 'E', 'E', 'W', 'W', 'W', 'E', 'E' },
+        { 'E', 'E', 'B', 'B', 'W', 'E', 'E', 'E' },
+        { 'E', 'W', 'B', 'B', 'W', 'E', 'E', 'E' },
+        { 'B', 'E', 'E', 'E', 'B', 'E', 'E', 'E' },
+        { 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E' }
+    };
+
+    g.loadMap(m, 8);
+
+    if(!g.playerTurn(2, 4))
+        cout << "Invalid turn" << endl;
     return 0;
 }
 

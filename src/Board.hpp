@@ -5,8 +5,6 @@
 #include <set>
 #include "Color.hpp"
 
-// TODO: Copy & move constructors
-
 class Board {
 public:
     Board(int size);
