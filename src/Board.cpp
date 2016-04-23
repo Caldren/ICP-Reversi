@@ -17,12 +17,12 @@ Board::~Board()
     m_board = nullptr;
 }
 
-int Board::getSize()
+int Board::getSize() const
 {
     return m_size;
 }
 
-int Board::getField(int x, int y)
+int Board::getField(int x, int y) const
 {
     if(x < 0 || x >= m_size || y < 0 || y >= m_size)
         throw std::range_error("Field coordinates are out of range");

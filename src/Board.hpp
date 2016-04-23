@@ -10,8 +10,8 @@ public:
     Board(int size);
     ~Board();
 
-    int getSize();
-    int getField(int x, int y);
+    int getSize() const;
+    int getField(int x, int y) const;
 
     void setField(int x, int y, int val);
 

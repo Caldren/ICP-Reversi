@@ -26,6 +26,24 @@ Game::~Game()
     m_curr_op = nullptr;
 }
 
+void Game::initGame()
+{
+    int x = m_board->getSize() / 2;
+
+    if(m_p1 == nullptr || m_p2 == nullptr)
+        throw std::invalid_argument("Both players must be set before "
+                                    "game initialization");
+
+    // Initial stone placement
+    m_board->setField(x, x, Color::WHITE);
+    m_board->setField(x - 1, x - 1, Color::WHITE);
+    m_board->setField(x, x - 1, Color::BLACK);
+    m_board->setField(x - 1, x, Color::BLACK);
+
+    m_p1->addToScore(2);
+    m_p2->addToScore(2);
+}
+
 void Game::addPlayer(const std::string &name, int score, int color)
 {
     if(m_p1 != nullptr && m_p2 != nullptr)
@@ -69,8 +87,8 @@ bool Game::playerTurn(int row, int col)
 
     // Add taken stones to player's score and
     // subtract them from opponent's score
-    int score = coords.size() + 1;
-    m_curr_p->addToScore(score);
+    int score = coords.size();
+    m_curr_p->addToScore(score + 1);
     m_curr_op->subFromScore(score);
 
     // Make the opponent current player
@@ -125,6 +143,11 @@ void Game::switchPlayers()
     Player *p = m_curr_p;
     m_curr_p = m_curr_op;
     m_curr_op = p;
+}
+
+const Board *Game::getBoard()
+{
+    return m_board;
 }
 
 bool Game::checkTurn(int row, int col, std::vector<Coordinate> &coords)

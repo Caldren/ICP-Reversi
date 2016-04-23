@@ -3,6 +3,7 @@
 #include "Board.hpp"
 #include "Game.hpp"
 #include "Player.hpp"
+#include "TUI.hpp"
 
 using namespace std;
 
@@ -11,8 +12,9 @@ void player_tests();
 
 int main(void)
 {
+    /*
     board_tests();
-    player_tests();
+//    player_tests();
 
     Game g(8);
     g.addPlayer("Test1");
@@ -45,6 +47,15 @@ int main(void)
 
     cout << "P1 score: " << g.getP1()->getScore() << endl;
     cout << "P2 score: " << g.getP2()->getScore() << endl;
+
+    cout << "Creating empty 8x8 board" << endl;
+    Game t(12);
+    cout << *(t.getBoard()) << endl;
+*/
+    TUI tui;
+
+    tui.init();
+
     return 0;
 }
 

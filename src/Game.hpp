@@ -17,6 +17,7 @@ public:
     Game(int size = 8);
     ~Game();
 
+    void initGame();
     void addPlayer(const std::string &name, int score = 0, int color = -1);
     bool playerTurn(int row, int col);
     bool skipTurn();
@@ -26,6 +27,8 @@ public:
     const Player *getCurrentPlayer();
     const Player *getCurrentOpponent();
     void switchPlayers();
+
+    const Board *getBoard();
 
     // TODO: Remove
     void loadMap(int map[][8], int size) {
