@@ -18,15 +18,8 @@ public:
     int getColor() const;
     int getType() const;
     int getScore() const;
-
-    int operator+(int x);
-    int operator-(int x);
-    int operator+=(int x);
-    int operator-=(int x);
-    int operator++(int);
-    int operator--(int);
-    int operator++();
-    int operator--();
+    void addToScore(int x);
+    void subFromScore(int x);
 
     enum PlayerType {
         HUMAN,

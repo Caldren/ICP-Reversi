@@ -67,50 +67,12 @@ int Player::getScore() const
     return m_score;
 }
 
-int Player::operator+(int x)
+void Player::addToScore(int x)
 {
     setScore(m_score + x);
-    return m_score;
 }
 
-int Player::operator-(int x)
+void Player::subFromScore(int x)
 {
     setScore(m_score - x);
-    return m_score;
-}
-
-int Player::operator+=(int x)
-{
-    setScore(m_score + x);
-    return m_score;
-}
-
-int Player::operator-=(int x)
-{
-    setScore(m_score - x);
-    return m_score;
-}
-
-int Player::operator++(int)
-{
-    setScore(m_score + 1);
-    return m_score;
-}
-
-int Player::operator--(int)
-{
-    setScore(m_score - 1);
-    return m_score;
-}
-
-int Player::operator++()
-{
-    setScore(m_score + 1);
-    return m_score;
-}
-
-int Player::operator--()
-{
-    setScore(m_score - 1);
-    return m_score;
 }

@@ -11,6 +11,7 @@ Game::Game(int size)
     m_p1 = nullptr;
     m_p2 = nullptr;
     m_curr_p = nullptr;
+    m_curr_op = nullptr;
 }
 
 Game::~Game()
@@ -22,6 +23,7 @@ Game::~Game()
     m_p1 = nullptr;
     m_p2 = nullptr;
     m_curr_p = nullptr;
+    m_curr_op = nullptr;
 }
 
 void Game::addPlayer(const std::string &name, int score, int color)
@@ -43,6 +45,8 @@ void Game::addPlayer(const std::string &name, int score, int color)
 
     if(m_curr_p == nullptr)
         m_curr_p = *p;
+    else if(m_curr_op == nullptr)
+        m_curr_op = *p;
 }
 
 bool Game::playerTurn(int row, int col)
@@ -63,6 +67,36 @@ bool Game::playerTurn(int row, int col)
     // TODO: Remove
     std::cout << *m_board << std::endl;
 
+    // Add taken stones to player's score and
+    // subtract them from opponent's score
+    int score = coords.size() + 1;
+    m_curr_p->addToScore(score);
+    m_curr_op->subFromScore(score);
+
+    // Make the opponent current player
+    switchPlayers();
+
+    return true;
+}
+
+bool Game::skipTurn()
+{
+    std::vector<Coordinate> coords;
+
+    for(int i = 0; i < m_board->getSize(); i++) {
+        for(int j = 0; j < m_board->getSize(); j++) {
+            if(m_board->getField(i, j) == Color::EMPTY) {
+                // Check for possible moves on current coords
+                if(checkTurn(i, j, coords))
+                    return false;
+            }
+        }
+    }
+
+    // No possible moves
+    // Make the opponent current player
+    switchPlayers();
+
     return true;
 }
 
@@ -78,12 +112,19 @@ const Player *Game::getP2()
 
 const Player *Game::getCurrentPlayer()
 {
-    return (m_curr_p == m_p1) ? m_p1 : m_p2;
+    return m_curr_p;
 }
 
 const Player *Game::getCurrentOpponent()
 {
-    return (m_curr_p == m_p1) ? m_p2 : m_p1;
+    return m_curr_op;
+}
+
+void Game::switchPlayers()
+{
+    Player *p = m_curr_p;
+    m_curr_p = m_curr_op;
+    m_curr_op = p;
 }
 
 bool Game::checkTurn(int row, int col, std::vector<Coordinate> &coords)

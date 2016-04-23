@@ -34,8 +34,17 @@ int main(void)
 
     g.loadMap(m, 8);
 
+    cout << "P1 score: " << g.getP1()->getScore() << endl;
+    cout << "P2 score: " << g.getP2()->getScore() << endl;
+
     if(!g.playerTurn(2, 4))
         cout << "Invalid turn" << endl;
+
+    if(!g.skipTurn())
+        cout << "Can't pass a turn" << endl;
+
+    cout << "P1 score: " << g.getP1()->getScore() << endl;
+    cout << "P2 score: " << g.getP2()->getScore() << endl;
     return 0;
 }
 
@@ -91,9 +100,4 @@ void player_tests()
     Player p("Test", Color::WHITE, Player::HUMAN);
     cout << p.getName() 
           << ": " << p.getScore() << endl;
-    p += 1;
-    cout << p.getName() << ": " << p.getScore() << endl;
-    p--;
-    p--;
-    cout << p.getName() << ": " << p.getScore() << endl;
 }
