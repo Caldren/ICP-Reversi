@@ -1,5 +1,7 @@
+#include <string>
+#include <fstream>
+#include <stdexcept>
 #include "History.hpp"
-#include <iostream>
 
 void History::add(int x, int y, int color,
         const std::vector<Coordinate> &stones)
@@ -25,4 +27,9 @@ const HistoryItem *History::moveForward()
         return nullptr;
 
     return &m_history[++m_curr_idx];
+}
+
+const std::vector<HistoryItem> *History::getData()
+{
+    return &m_history;
 }

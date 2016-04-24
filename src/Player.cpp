@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <algorithm>
 #include "Player.hpp"
 #include "Color.hpp"
 
@@ -12,10 +13,14 @@ Player::Player(const std::string &name, int color, int type)
 
 void Player::setName(const std::string &name)
 {
-    if(name.size() == 0)
+    if(name.size() == 0) {
         m_name = "Unnamed";
-    else
+    } else {
         m_name = name;
+        // Replace all tabs with spaces
+        // (we'll use tab as a value separator in saves)
+        std::replace(m_name.begin(), m_name.end(), '\t', ' ');
+    }
 }
 
 void Player::setColor(int color)

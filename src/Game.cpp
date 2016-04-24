@@ -1,6 +1,8 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <fstream>
+#include <sstream>
 #include "Game.hpp"
 #include "Coordinate.hpp"
 
@@ -8,12 +10,14 @@ Game::Game(int size)
 {
     m_board = new Board(size);
     m_size = size;
-    m_p1 = nullptr;
-    m_p2 = nullptr;
-    m_curr_p = nullptr;
-    m_curr_op = nullptr;
-    m_winner = nullptr;
-    m_game_over = false;
+}
+
+Game::Game(const std::string &filename)
+{
+    std::string error;
+
+    if(!load(filename, error))
+        throw std::runtime_error(error);
 }
 
 Game::~Game()
@@ -43,8 +47,11 @@ void Game::initGame()
     m_board->setField(x, x - 1, Color::BLACK);
     m_board->setField(x - 1, x, Color::BLACK);
 
-    m_p1->addToScore(2);
-    m_p2->addToScore(2);
+    // Don't ovewrite score if it was loaded from a file
+    if(m_p1->getScore() == 0)
+        m_p1->addToScore(2);
+    if(m_p2->getScore() == 0)
+        m_p2->addToScore(2);
 }
 
 void Game::addPlayer(const std::string &name, int score, int color)
@@ -214,6 +221,100 @@ bool Game::isGameOver()
     return m_game_over;
 }
 
+bool Game::save(const std::string &filename, std::string &error)
+{
+    std::ofstream out;
+
+    if(m_p1 == nullptr || m_p2 == nullptr) {
+        error = "Can't save uninitialized game";
+        return false;
+    }
+
+    try {
+        out.open(filename.c_str());
+    } catch(const std::exception &e) {
+        error = e.what();
+        return false;
+    }
+
+    out << m_board->getSize() << '\n'
+        << m_p1->getType() << '\t' << m_p1->getName() << '\n'
+        << m_p2->getType() << '\t' << m_p2->getName() << '\n';
+
+    const std::vector<HistoryItem> *h = m_history.getData();
+    for(auto item : *h) {
+        out << item.x << '\t' << item.y << '\t' << item.color << "\n";
+    }
+
+    out.close();
+
+    return true;
+}
+
+bool Game::load(const std::string &filename, std::string &error)
+{
+    std::ifstream in;
+    std::string input, name;
+    int type, color, size;
+    int x, y;
+
+    if(m_p1 != nullptr || m_p2 != nullptr) {
+        error = "Can't overwrite current game";
+        return false;
+    }
+
+    try {
+        in.open(filename.c_str());
+
+        std::getline(in, input);
+        size = stoi(input);
+
+        m_board = new Board(size);
+        m_size = size;
+
+        for(unsigned int i = 0; i < 2; i++) {
+            std::getline(in, input, '\t');
+            type = std::stoi(input);
+            std::getline(in, input, '\n');
+            name = input;
+
+            // TODO: Check type
+            addPlayer(name);
+        }
+
+        initGame();
+
+        while(std::getline(in, input)) {
+            std::cout << input << std::endl;
+            std::vector<Coordinate> coords;
+            std::istringstream is(input);
+            is >> x >> y >> color;
+
+            if(x == -1 && y == -1) {
+                if(!skipTurn()) {
+                    throw std::runtime_error("Invalid turn skip");
+                }
+            } else {
+                if(!playerTurn(x, y)) {
+                    std::ostringstream os;
+                    os << "Invalid turn coords <" << x << ";" << y << ">";
+                    throw std::runtime_error(os.str());
+                }
+            }
+        }
+    } catch(const std::exception &e) {
+        error = e.what();
+        if(error == "stoi")
+            error = "Invalid data";
+
+        return false;
+    }
+
+    in.close();
+
+    return true;
+}
+
 bool Game::checkTurn(int row, int col, std::vector<Coordinate> &coords, int c)
 {
     std::vector<Coordinate> temp;
@@ -367,6 +468,9 @@ bool Game::checkTurn(int row, int col, std::vector<Coordinate> &coords, int c)
 
 bool Game::checkGameEnd()
 {
+    m_game_over = false;
+    m_winner = nullptr;
+
     if(checkPossibleTurn(getP1()->getColor()) &&
        checkPossibleTurn(getP2()->getColor())) {
         m_game_over = true;

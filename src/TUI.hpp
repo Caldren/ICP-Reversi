@@ -7,6 +7,7 @@ class TUI {
 public:
     ~TUI();
     void init();
+    void loadGame();
     void playerPrompt(int id);
     void drawUI();
     void gameControl();

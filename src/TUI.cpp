@@ -14,32 +14,63 @@ TUI::~TUI()
 void TUI::init()
 {
     int n = '\n';
+    char c;
     std::string str;
 
-    std::cout << "Size of game board (6, 8, 10, 12): ";
-    std::getline(std::cin, str);
+    do {
+        std::cout << "Do you wan't to start a new game (n) or load an "
+                  << "existing one (l)? ";
+        std::cin >> c;
+
+        if(c == 'n') {
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cin.clear();
+            std::cout << "Size of game board (6, 8, 10, 12): ";
+            std::getline(std::cin, str);
+
+            try {
+                if(str.empty()) {
+                    n = 8;
+                } else {
+                    std::string::size_type st;
+                    n = stoi(str, &st);
+                    if(st != str.size())
+                        throw std::invalid_argument("Invalid size");
+                }
+
+                m_game = new Game(n);
+            } catch(const std::exception &e) {
+                std::cerr << "Couldn't create game board: " << e.what()
+                          << std::endl;
+                exit(1);
+            }
+
+            playerPrompt(1);
+            playerPrompt(2);
+            m_game->initGame();
+        } else if(c == 'l') {
+            loadGame();
+        }
+    } while(c != 'l' && c != 'n');
+
+    gameControl();
+}
+
+void TUI::loadGame()
+{
+    std::string file, error;
+
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cin.clear();
+    std::cout << "Enter filename: ";
+    std::getline(std::cin, file);
 
     try {
-        if(str.empty()) {
-            n = 8;
-        } else {
-            std::string::size_type st;
-            n = stoi(str, &st);
-            if(st != str.size())
-                throw std::invalid_argument("Invalid size");
-        }
-
-        m_game = new Game(n);
+        m_game = new Game(file);
     } catch(const std::exception &e) {
-        std::cerr << "Couldn't create game board: " << e.what() << std::endl;
+        std::cerr << "Failed to load saved game: " << e.what() << std::endl;
         exit(1);
     }
-
-    playerPrompt(1);
-    playerPrompt(2);
-
-    m_game->initGame();
-    gameControl();
 }
 
 void TUI::playerPrompt(int id)
@@ -135,6 +166,7 @@ void TUI::gameControl()
     int x, y;
     const Player *cp;
     std::string state = "";
+    std::string file;
 
     do {
         if(m_game->isGameOver()) {
@@ -153,6 +185,7 @@ void TUI::gameControl()
                   << "s\tSkip turn" << std::endl
                   << "b\tPrevious turn from history" << std::endl
                   << "f\tNext turn from history" << std::endl
+                  << "v\tSave current game" << std::endl
                   << "g\tGive up" << std::endl << std::endl;
         if(state.size() > 0) {
             std::cout << state << std::endl;
@@ -182,6 +215,14 @@ void TUI::gameControl()
         case 'f':
             if(!m_game->nextTurn())
                 state = "No next turn available in history buffer\n";
+            break;
+        case 'v':
+            std::cout << "Enter filename: ";
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cin.clear();
+            std::getline(std::cin, file);
+            if(m_game->save(file, state))
+                state = "Game was successfully saved";
             break;
         default:
             state = "Invalid option, try again\n";

@@ -12,6 +12,7 @@
 class Game {
 public:
     Game(int size = 8);
+    Game(const std::string &filename);
     ~Game();
 
     void initGame();
@@ -30,6 +31,9 @@ public:
 
     const Board *getBoard();
     bool isGameOver();
+
+    bool save(const std::string &filename, std::string &error);
+    bool load(const std::string &filename, std::string &error);
 
     // TODO: Remove
     void loadMap(int map[][8], int size) {
@@ -50,15 +54,15 @@ private:
 public:
 
 private:
-    Player *m_p1;
-    Player *m_p2;
-    Player *m_curr_p;
-    Player *m_curr_op;
-    Player *m_winner;
+    Player *m_p1 = nullptr;
+    Player *m_p2 = nullptr;
+    Player *m_curr_p = nullptr;
+    Player *m_curr_op = nullptr;
+    Player *m_winner = nullptr;
     Board *m_board = nullptr;
     History m_history;
-    int m_size;
-    bool m_game_over;
+    int m_size = 0;
+    bool m_game_over = false;
 };
 
 #endif
