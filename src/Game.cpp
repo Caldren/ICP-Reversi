@@ -203,12 +203,12 @@ const Player *Game::getWinner()
 
 void Game::switchPlayers()
 {
-    if(checkGameEnd())
-        return;
-
     Player *p = m_curr_p;
     m_curr_p = m_curr_op;
     m_curr_op = p;
+
+    if(checkGameEnd())
+        return;
 }
 
 const Board *Game::getBoard()
