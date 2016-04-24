@@ -109,6 +109,6 @@ void board_tests()
 void player_tests()
 {
     Player p("Test", Color::WHITE, Player::HUMAN);
-    cout << p.getName() 
+    cout << p.getName()
           << ": " << p.getScore() << endl;
 }

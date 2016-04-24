@@ -134,19 +134,29 @@ void TUI::gameControl()
     char c;
     int x, y;
     const Player *cp;
-    std::string error = "";
+    std::string state = "";
 
     do {
+        if(m_game->isGameOver()) {
+            const Player *p = m_game->getWinner();
+            if(p == nullptr)
+                state = "*** GAME END - DRAW! ***\n";
+            else
+                state = "*** GAME END - WINNER: " + p->getName() + " ***\n";
+        }
+
         drawUI();
         cp = m_game->getCurrentPlayer();
         std::cout << "Current player: " << cp->getName() << std::endl;
         std::cout << "Options:" << std::endl
                   << "p 1 2\tPlace stone on coords <1;2>" << std::endl
                   << "s\tSkip turn" << std::endl
+                  << "b\tPrevious turn from history" << std::endl
+                  << "f\tNext turn from history" << std::endl
                   << "g\tGive up" << std::endl << std::endl;
-        if(error.size() > 0) {
-            std::cout << error << std::endl;
-            error = "";
+        if(state.size() > 0) {
+            std::cout << state << std::endl;
+            state = "";
         }
 
         std::cout << "Selected option: ";
@@ -156,14 +166,25 @@ void TUI::gameControl()
         case 'p':
             std::cin >> x >> y;
             if(!m_game->playerTurn(x - 1, y - 1))
-                error = "Invalid turn! Try again.\n";
+                state= "Invalid turn! Try again.\n";
 
             break;
 
         case 's':
             if(!m_game->skipTurn())
-                error = "Can't skip current turn - at least one valid move "
+                state = "Can't skip current turn - at least one valid move "
                         "is available\n";
+            break;
+        case 'b':
+            if(!m_game->prevTurn())
+                state = "No previous turn available in history buffer\n";
+            break;
+        case 'f':
+            if(!m_game->nextTurn())
+                state = "No next turn available in history buffer\n";
+            break;
+        default:
+            state = "Invalid option, try again\n";
         }
-    } while(true);
+    } while(std::cin.good());
 }

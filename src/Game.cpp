@@ -12,6 +12,8 @@ Game::Game(int size)
     m_p2 = nullptr;
     m_curr_p = nullptr;
     m_curr_op = nullptr;
+    m_winner = nullptr;
+    m_game_over = false;
 }
 
 Game::~Game()
@@ -24,6 +26,7 @@ Game::~Game()
     m_p2 = nullptr;
     m_curr_p = nullptr;
     m_curr_op = nullptr;
+    m_winner = nullptr;
 }
 
 void Game::initGame()
@@ -72,7 +75,7 @@ bool Game::playerTurn(int row, int col)
     std::vector<Coordinate> coords;
     int player_color = getCurrentPlayer()->getColor();
 
-    if(!checkTurn(row, col, coords))
+    if(!checkTurn(row, col, coords, player_color))
         return false;
 
     // Set all taken stones to player's color
@@ -91,28 +94,76 @@ bool Game::playerTurn(int row, int col)
     m_curr_p->addToScore(score + 1);
     m_curr_op->subFromScore(score);
 
+    // Add current turn into history
+    m_history.add(row, col, getCurrentPlayer()->getColor(), coords);
+
     // Make the opponent current player
     switchPlayers();
 
     return true;
 }
 
-bool Game::skipTurn()
+bool Game::skipTurn(int color)
 {
-    std::vector<Coordinate> coords;
+    int player_color = (color == -1) ? getCurrentPlayer()->getColor() : color;
 
-    for(int i = 0; i < m_board->getSize(); i++) {
-        for(int j = 0; j < m_board->getSize(); j++) {
-            if(m_board->getField(i, j) == Color::EMPTY) {
-                // Check for possible moves on current coords
-                if(checkTurn(i, j, coords))
-                    return false;
-            }
-        }
-    }
+    if(!checkPossibleTurn(player_color))
+        return false;
 
     // No possible moves
+    // Add current turn into history
+    m_history.add(-1, -1, getCurrentPlayer()->getColor(), {});
+
     // Make the opponent current player
+    switchPlayers();
+
+    return true;
+}
+
+bool Game::prevTurn()
+{
+    const HistoryItem *h = m_history.moveBack();
+
+    if(h == nullptr)
+        return false;
+
+    if(h->x != -1 && h->y != -1) {
+        m_board->setField(h->x, h->y, Color::EMPTY);
+        m_curr_op->subFromScore(1);
+    }
+
+    int op_color = (h->color == Color::BLACK) ? Color::WHITE : Color::BLACK;
+    for(auto coord : h->stones) {
+        m_board->setField(coord.x, coord.y, op_color);
+    }
+
+    m_curr_p->addToScore(h->stones.size());
+    m_curr_op->subFromScore(h->stones.size());
+
+    switchPlayers();
+
+    return true;
+}
+
+bool Game::nextTurn()
+{
+    const HistoryItem *h = m_history.moveForward();
+
+    if(h == nullptr)
+        return false;
+
+    if(h->x != -1 && h->y != -1) {
+        m_board->setField(h->x, h->y, h->color);
+        m_curr_p->addToScore(1);
+    }
+
+    for(auto coord : h->stones) {
+        m_board->setField(coord.x, coord.y, h->color);
+    }
+
+    m_curr_p->addToScore(h->stones.size());
+    m_curr_op->subFromScore(h->stones.size());
+
     switchPlayers();
 
     return true;
@@ -138,8 +189,16 @@ const Player *Game::getCurrentOpponent()
     return m_curr_op;
 }
 
+const Player *Game::getWinner()
+{
+    return m_winner;
+}
+
 void Game::switchPlayers()
 {
+    if(checkGameEnd())
+        return;
+
     Player *p = m_curr_p;
     m_curr_p = m_curr_op;
     m_curr_op = p;
@@ -150,11 +209,16 @@ const Board *Game::getBoard()
     return m_board;
 }
 
-bool Game::checkTurn(int row, int col, std::vector<Coordinate> &coords)
+bool Game::isGameOver()
+{
+    return m_game_over;
+}
+
+bool Game::checkTurn(int row, int col, std::vector<Coordinate> &coords, int c)
 {
     std::vector<Coordinate> temp;
-    int player_color = getCurrentPlayer()->getColor();
-    int opponent_color = getCurrentOpponent()->getColor();
+    int player_color = c;
+    int opponent_color = (c == Color::BLACK) ? Color::WHITE : Color::BLACK;
     int color;
 
     // Can't place a stone on a non-empty field
@@ -297,6 +361,65 @@ bool Game::checkTurn(int row, int col, std::vector<Coordinate> &coords)
     std::sort(coords.begin(), coords.end(), Coordinate::comp);
     it = std::unique(coords.begin(), coords.end(), Coordinate::comp);
     coords.resize(std::distance(coords.begin(), it));
+
+    return true;
+}
+
+bool Game::checkGameEnd()
+{
+    if(checkPossibleTurn(getP1()->getColor()) &&
+       checkPossibleTurn(getP2()->getColor())) {
+        m_game_over = true;
+
+        int p1c = getP1()->getColor();
+        int p2c = getP2()->getColor();
+        int p1s = 0, p2s = 0, es = 0;
+        int color;
+
+        for(int i = 0; i < m_board->getSize(); i++) {
+            for(int j = 0; j < m_board->getSize(); j++) {
+                color = m_board->getField(i, j);
+
+                if(color == p1c)
+                    p1s++;
+                else if(color == p2c)
+                    p2s++;
+                else
+                    es++;
+            }
+        }
+
+        if(p1s > p2s) {
+            m_winner = m_p1;
+            m_p1->setScore(p1s + es);
+            m_p2->setScore(p2s);
+        } else if(p2s > p1s) {
+            m_winner = m_p2;
+            m_p1->setScore(p1s);
+            m_p2->setScore(p2s + es);
+        } else {
+            m_winner = nullptr;
+            m_p1->setScore(p1s);
+            m_p2->setScore(p2s);
+        }
+    }
+
+    return m_game_over;
+}
+
+bool Game::checkPossibleTurn(int color)
+{
+    std::vector<Coordinate> coords;
+
+    for(int i = 0; i < m_board->getSize(); i++) {
+        for(int j = 0; j < m_board->getSize(); j++) {
+            if(m_board->getField(i, j) == Color::EMPTY) {
+                // Check for possible moves on current coords
+                if(checkTurn(i, j, coords, color))
+                    return false;
+            }
+        }
+    }
 
     return true;
 }

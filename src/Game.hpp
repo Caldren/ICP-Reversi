@@ -5,11 +5,8 @@
 #include "Board.hpp"
 #include "Player.hpp"
 #include "Coordinate.hpp"
+#include "History.hpp"
 
-// TODO: Copy & move constructors
-// TODO: skipTurn()
-//  * player must do a turn if he can
-//
 // TODO: Copy & move constructors
 
 class Game {
@@ -20,15 +17,19 @@ public:
     void initGame();
     void addPlayer(const std::string &name, int score = 0, int color = -1);
     bool playerTurn(int row, int col);
-    bool skipTurn();
+    bool skipTurn(int color = -1);
+    bool prevTurn();
+    bool nextTurn();
 
     const Player *getP1();
     const Player *getP2();
     const Player *getCurrentPlayer();
     const Player *getCurrentOpponent();
+    const Player *getWinner();
     void switchPlayers();
 
     const Board *getBoard();
+    bool isGameOver();
 
     // TODO: Remove
     void loadMap(int map[][8], int size) {
@@ -42,7 +43,9 @@ public:
     }
 
 private:
-    bool checkTurn(int row, int col, std::vector<Coordinate> &coords);
+    bool checkTurn(int row, int col, std::vector<Coordinate> &coords, int c);
+    bool checkGameEnd();
+    bool checkPossibleTurn(int color);
 
 public:
 
@@ -51,8 +54,11 @@ private:
     Player *m_p2;
     Player *m_curr_p;
     Player *m_curr_op;
+    Player *m_winner;
     Board *m_board = nullptr;
+    History m_history;
     int m_size;
+    bool m_game_over;
 };
 
 #endif
