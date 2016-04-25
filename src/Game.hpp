@@ -15,11 +15,11 @@ public:
     Game(const std::string &filename);
     ~Game();
 
-    void initGame();
-    void addPlayer(const std::string &name, int type = Player::HUMAN,
-                   int score = 0, int color = -1);
-    bool playerTurn(int row, int col);
-    bool skipTurn(int color = -1);
+    void initGame(bool load = false);
+    const Player *addPlayer(const std::string &name, int type = Player::HUMAN,
+                            int score = 0, int color = -1);
+    bool playerTurn(int row, int col, bool load = false);
+    bool skipTurn(int color = -1, bool load = false);
     bool prevTurn();
     bool nextTurn();
 

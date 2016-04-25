@@ -3,6 +3,7 @@
 #include <string>
 #include <limits>
 #include <iomanip>
+#include "AI.hpp"
 #include "TUI.hpp"
 
 TUI::~TUI()
@@ -76,7 +77,9 @@ void TUI::loadGame()
 void TUI::playerPrompt(int id)
 {
     char c;
+    int algo, range;
     std::string str;
+    const Player *p;
 
     do {
         std::cout << "Player " << id << " settings:" << std::endl
@@ -90,10 +93,27 @@ void TUI::playerPrompt(int id)
             getline(std::cin, str);
 
             try {
-                if(c == 'h')
+                if(c == 'h') {
                     m_game->addPlayer(str);
-                else
-                    m_game->addPlayer(str, Player::AI);
+                } else {
+                    p = m_game->addPlayer(str, Player::AI);
+                    range = ((AI*)p)->getAlgorithmCount() - 1;
+                    if(range < 0) {
+                        throw std::runtime_error("No AI algorithms available");
+                    }
+
+                    do {
+                        std::cout << "Choose AI algorithm (0 - "
+                                  << range << "): ";
+                        std::cin >> algo;
+                        try {
+                            ((AI*)p)->setAlgorithm(algo);
+                            break;
+                        } catch(const std::exception &e) {
+                            std::cerr << e.what() << std::endl;
+                        }
+                    } while(true);
+                }
             } catch(const std::exception &e) {
                 std::cerr << "Couldn't add player: " << e.what() << std::endl;
                 c = '\0';
@@ -186,7 +206,8 @@ void TUI::gameControl()
                   << "s\tSkip turn" << std::endl
                   << "b\tPrevious turn from history" << std::endl
                   << "f\tNext turn from history" << std::endl
-                  << "v\tSave current game" << std::endl << std::endl;
+                  << "v\tSave current game" << std::endl
+                  << "q\tQuit" << std::endl;
         if(state.size() > 0) {
             std::cout << state << std::endl;
             state = "";
@@ -224,6 +245,9 @@ void TUI::gameControl()
             if(m_game->save(file, state))
                 state = "Game was successfully saved";
             break;
+        case 'q':
+            return;
+            break; // Just in case
         default:
             state = "Invalid option, try again\n";
         }

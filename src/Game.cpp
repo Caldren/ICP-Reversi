@@ -34,7 +34,7 @@ Game::~Game()
     m_winner = nullptr;
 }
 
-void Game::initGame()
+void Game::initGame(bool load)
 {
     int x = m_board->getSize() / 2;
 
@@ -54,11 +54,12 @@ void Game::initGame()
     if(m_p2->getScore() == 0)
         m_p2->addToScore(2);
 
-    if(m_curr_p->getType() == Player::AI)
+    if(!load && m_curr_p->getType() == Player::AI)
         getAITurn();
 }
 
-void Game::addPlayer(const std::string &name, int type, int score, int color)
+const Player *Game::addPlayer(const std::string &name, int type, int score,
+                              int color)
 {
     if(m_p1 != nullptr && m_p2 != nullptr)
         throw std::range_error("All player slots are full");
@@ -87,9 +88,11 @@ void Game::addPlayer(const std::string &name, int type, int score, int color)
         m_curr_p = *p;
     else if(m_curr_op == nullptr)
         m_curr_op = *p;
+
+    return *p;
 }
 
-bool Game::playerTurn(int row, int col)
+bool Game::playerTurn(int row, int col, bool load)
 {
     std::vector<Coordinate> coords;
     int player_color = getCurrentPlayer()->getColor();
@@ -114,12 +117,12 @@ bool Game::playerTurn(int row, int col)
     m_history.add(row, col, getCurrentPlayer()->getColor(), coords);
 
     // Make the opponent current player
-    switchPlayers();
+    switchPlayers(load);
 
     return true;
 }
 
-bool Game::skipTurn(int color)
+bool Game::skipTurn(int color, bool load)
 {
     int player_color = (color == -1) ? getCurrentPlayer()->getColor() : color;
 
@@ -131,7 +134,7 @@ bool Game::skipTurn(int color)
     m_history.add(-1, -1, getCurrentPlayer()->getColor(), {});
 
     // Make the opponent current player
-    switchPlayers();
+    switchPlayers(load);
 
     return true;
 }
@@ -298,11 +301,15 @@ bool Game::load(const std::string &filename, std::string &error)
             std::getline(in, input, '\n');
             name = input;
 
-            // TODO: Check type
-            addPlayer(name);
+            if(type == Player::HUMAN)
+                addPlayer(name);
+            else if(type == Player::AI)
+                addPlayer(name, Player::AI);
+            else
+                throw std::runtime_error("Invalid player type");
         }
 
-        initGame();
+        initGame(true);
 
         while(std::getline(in, input)) {
             std::cout << input << std::endl;
@@ -311,17 +318,21 @@ bool Game::load(const std::string &filename, std::string &error)
             is >> x >> y >> color;
 
             if(x == -1 && y == -1) {
-                if(!skipTurn()) {
+                if(!skipTurn(-1, true)) {
                     throw std::runtime_error("Invalid turn skip");
                 }
             } else {
-                if(!playerTurn(x, y)) {
+                if(!playerTurn(x, y, true)) {
                     std::ostringstream os;
                     os << "Invalid turn coords <" << x << ";" << y << ">";
                     throw std::runtime_error(os.str());
                 }
             }
         }
+
+        if(getCurrentPlayer()->getType() == Player::AI && !checkGameEnd())
+            throw std::runtime_error("Invalid save file (no coords for AI");
+
     } catch(const std::exception &e) {
         error = e.what();
         if(error == "stoi")

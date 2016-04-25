@@ -9,8 +9,12 @@ public:
     AI(const std::string &name, int color);
     Coordinate makeTurn(const Board *b);
 
+    int getAlgorithmCount();
+    void setAlgorithm(int id);
+
 private:
     Coordinate algorithm1(const Board *b);
+    Coordinate algorithm2(const Board *b);
 
 private:
     std::vector<Coordinate (AI::*)(const Board *b)> m_algorithms;
