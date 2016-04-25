@@ -72,10 +72,14 @@ void Game::addPlayer(const std::string &name, int type, int score, int color)
 
     Player **p = (m_p1 == nullptr) ? &m_p1 : &m_p2;
 
-    if(type == Player::HUMAN)
+    if(type == Player::HUMAN) {
         *p = new Player(name, color);
-    else if(type == Player::AI)
+    } else if(type == Player::AI) {
+        if(m_p1 != nullptr && m_p1->getType() == Player::AI)
+            throw std::runtime_error("At least one player must be a human");
+
         *p = new AI(name, color);
+    }
 
     (*p)->setScore(score);
 
@@ -152,7 +156,13 @@ bool Game::prevTurn()
     m_curr_p->addToScore(h->stones.size());
     m_curr_op->subFromScore(h->stones.size());
 
-    switchPlayers();
+    switchPlayers(true);
+    if(m_curr_p->getType() == Player::AI) {
+        // If AI took the first turn, move back to former turn,
+        // so player can't modify AI's logic
+        if(!prevTurn())
+            nextTurn();
+    }
 
     return true;
 }
@@ -176,7 +186,9 @@ bool Game::nextTurn()
     m_curr_p->addToScore(h->stones.size());
     m_curr_op->subFromScore(h->stones.size());
 
-    switchPlayers();
+    switchPlayers(true);
+    if(m_curr_p->getType() == Player::AI)
+        nextTurn();
 
     return true;
 }
@@ -206,7 +218,7 @@ const Player *Game::getWinner()
     return m_winner;
 }
 
-void Game::switchPlayers()
+void Game::switchPlayers(bool history)
 {
     Player *p = m_curr_p;
     m_curr_p = m_curr_op;
@@ -215,7 +227,7 @@ void Game::switchPlayers()
     if(checkGameEnd())
         return;
 
-    if(m_curr_p->getType() == Player::AI)
+    if(m_curr_p->getType() == Player::AI && !history)
         getAITurn();
 }
 
@@ -389,8 +401,10 @@ void Game::getAITurn()
 {
     Coordinate coord;
     coord = m_curr_p->makeTurn(m_board);
-    if(coord.x == -1 || coord.y == -1)
-        throw std::runtime_error("AI algorithm error - invalid coords");
-
-    playerTurn(coord.x, coord.y);
+    if(coord.x == -1 || coord.y == -1) {
+        if(!skipTurn())
+            throw std::runtime_error("AI algorithm error - invalid coords");
+    } else {
+        playerTurn(coord.x, coord.y);
+    }
 }

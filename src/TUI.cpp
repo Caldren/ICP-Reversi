@@ -96,6 +96,7 @@ void TUI::playerPrompt(int id)
                     m_game->addPlayer(str, Player::AI);
             } catch(const std::exception &e) {
                 std::cerr << "Couldn't add player: " << e.what() << std::endl;
+                c = '\0';
             }
         }
     } while(c != 'a' && c != 'h');
@@ -185,8 +186,7 @@ void TUI::gameControl()
                   << "s\tSkip turn" << std::endl
                   << "b\tPrevious turn from history" << std::endl
                   << "f\tNext turn from history" << std::endl
-                  << "v\tSave current game" << std::endl
-                  << "g\tGive up" << std::endl << std::endl;
+                  << "v\tSave current game" << std::endl << std::endl;
         if(state.size() > 0) {
             std::cout << state << std::endl;
             state = "";

@@ -28,7 +28,7 @@ public:
     const Player *getCurrentPlayer();
     const Player *getCurrentOpponent();
     const Player *getWinner();
-    void switchPlayers();
+    void switchPlayers(bool history = false);
 
     const Board *getBoard();
     bool isGameOver();
