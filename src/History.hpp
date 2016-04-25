@@ -14,7 +14,7 @@ public:
     void add(int x, int y, int color, const std::vector<Coordinate> &stones);
     const HistoryItem *moveBack();
     const HistoryItem *moveForward();
-    const std::vector<HistoryItem> *getData();
+    std::vector<HistoryItem> getData(bool only_current = false);
 
 private:
     int m_curr_idx;

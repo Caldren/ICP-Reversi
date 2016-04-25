@@ -268,8 +268,8 @@ bool Game::save(const std::string &filename, std::string &error)
         out << '\n';
     }
 
-    const std::vector<HistoryItem> *h = m_history.getData();
-    for(auto item : *h) {
+    const std::vector<HistoryItem> h = m_history.getData(true);
+    for(auto item : h) {
         out << item.x << '\t' << item.y << '\t' << item.color << "\n";
     }
 

@@ -29,7 +29,11 @@ const HistoryItem *History::moveForward()
     return &m_history[++m_curr_idx];
 }
 
-const std::vector<HistoryItem> *History::getData()
+std::vector<HistoryItem> History::getData(bool only_current)
 {
-    return &m_history;
+    if(only_current)
+        return std::vector<HistoryItem>(m_history.begin(),
+                                        m_history.begin() + m_curr_idx + 1);
+
+    return m_history;
 }
