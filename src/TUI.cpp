@@ -83,17 +83,17 @@ void TUI::playerPrompt(int id)
                   << "Type (h for human, a for AI): ";
         std::cin >> c;
 
-        if(c == 'a') {
-            // TODO
-            throw std::invalid_argument("TODO");
-        } else if(c == 'h') {
+        if(c == 'h' || c == 'a') {
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             std::cin.clear();
             std::cout << "Player " << id << " name: ";
             getline(std::cin, str);
 
             try {
-                m_game->addPlayer(str);
+                if(c == 'h')
+                    m_game->addPlayer(str);
+                else
+                    m_game->addPlayer(str, Player::AI);
             } catch(const std::exception &e) {
                 std::cerr << "Couldn't add player: " << e.what() << std::endl;
             }

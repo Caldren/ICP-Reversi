@@ -3,7 +3,9 @@
 
 #include <iostream>
 #include <set>
+#include <vector>
 #include "Color.hpp"
+#include "Coordinate.hpp"
 
 class Board {
 public:
@@ -14,6 +16,8 @@ public:
     int getField(int x, int y) const;
 
     void setField(int x, int y, int val);
+    bool checkTurn(int row, int col, std::vector<Coordinate> &coords,
+                   int c) const;
 
     friend std::ostream &operator<<(std::ostream &out, const Board &b);
 private:

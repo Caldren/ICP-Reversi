@@ -3,11 +3,11 @@
 #include "Player.hpp"
 #include "Color.hpp"
 
-Player::Player(const std::string &name, int color, int type)
+Player::Player(const std::string &name, int color)
 {
     setName(name);
     setColor(color);
-    setType(type);
+    setType(Player::HUMAN);
     m_score = 0;
 }
 

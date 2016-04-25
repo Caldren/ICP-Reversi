@@ -1,6 +1,8 @@
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>
+#include <vector>
+#include <algorithm>
 #include "Board.hpp"
 
 Board::Board(int size)
@@ -39,6 +41,156 @@ void Board::setField(int x, int y, int val)
         throw std::invalid_argument("Invalid color");
 
     m_board[x][y] = val;
+}
+
+bool Board::checkTurn(int row, int col, std::vector<Coordinate> &coords,
+                      int c) const
+{
+    std::vector<Coordinate> temp;
+    int player_color = c;
+    int opponent_color = (c == Color::BLACK) ? Color::WHITE : Color::BLACK;
+    int color;
+
+    // Can't place a stone on a non-empty field
+    // getField() also throws an exception on invalid coords
+    try {
+        if(getField(row, col) != Color::EMPTY)
+            return false;
+    } catch(...) {
+        return false;
+    }
+
+    // horizontal, left
+    for(int i = col - 1; i >= 0; i--) {
+        color = getField(row, i);
+        if(color == player_color) {
+            coords.insert(coords.end(), temp.begin(), temp.end());
+            break;
+        }
+
+        if(color != opponent_color)
+            break;
+
+        temp.push_back(Coordinate(row, i));
+    }
+
+    temp.clear();
+    // horizontal, right
+    for(int i = col + 1; i < getSize(); i++) {
+        color = getField(row, i);
+        if(color == player_color) {
+            coords.insert(coords.end(), temp.begin(), temp.end());
+            break;
+        }
+
+        if(color != opponent_color)
+            break;
+
+        temp.push_back(Coordinate(row, i));
+    }
+
+    temp.clear();
+    // vertical, up
+    for(int i = row - 1; i >= 0; i--) {
+        color = getField(i, col);
+        if(color == player_color) {
+            coords.insert(coords.end(), temp.begin(), temp.end());
+            break;
+        }
+
+        if(color != opponent_color)
+            break;
+
+        temp.push_back(Coordinate(i, col));
+    }
+
+    temp.clear();
+    // vertical, down
+    for(int i = row + 1; i < getSize(); i++) {
+        color = getField(i, col);
+        if(color == player_color) {
+            coords.insert(coords.end(), temp.begin(), temp.end());
+            break;
+        }
+
+        if(color != opponent_color)
+            break;
+
+        temp.push_back(Coordinate(i, col));
+    }
+
+    temp.clear();
+    // left diagonal, up
+    for(int i = row - 1, j = col - 1; i >= 0 && j >= 0; i--, j--) {
+        color = getField(i, j);
+        if(color == player_color) {
+            coords.insert(coords.end(), temp.begin(), temp.end());
+            break;
+        }
+
+        if(color != opponent_color)
+            break;
+
+        temp.push_back(Coordinate(i, j));
+    }
+
+    temp.clear();
+    // left diagonal, down
+    for(int i = row + 1, j = col + 1; i < getSize() &&
+            j < getSize(); i++, j++) {
+        color = getField(i, j);
+        if(color == player_color) {
+            coords.insert(coords.end(), temp.begin(), temp.end());
+            break;
+        }
+
+        if(color != opponent_color)
+            break;
+
+        temp.push_back(Coordinate(i, j));
+    }
+
+    temp.clear();
+    // right diagonal, up
+    for(int i = row - 1, j = col + 1; i >= 0 && j < getSize(); i--, j++) {
+        color = getField(i, j);
+        if(color == player_color) {
+            coords.insert(coords.end(), temp.begin(), temp.end());
+            break;
+        }
+
+        if(color != opponent_color)
+            break;
+
+        temp.push_back(Coordinate(i, j));
+    }
+
+    temp.clear();
+    // right diagonal, down
+    for(int i = row + 1, j = col - 1; i < getSize() && j >= 0; i++, j--) {
+        color = getField(i, j);
+        if(color == player_color) {
+            coords.insert(coords.end(), temp.begin(), temp.end());
+            break;
+        }
+
+        if(color != opponent_color)
+            break;
+
+        temp.push_back(Coordinate(i, j));
+    }
+
+    // Player has to take at least one opponent's stone
+    if(coords.size() == 0)
+        return false;
+
+    // Sort coords vector and remove duplicates
+    std::vector<Coordinate>::iterator it;
+    std::sort(coords.begin(), coords.end(), Coordinate::comp);
+    it = std::unique(coords.begin(), coords.end(), Coordinate::comp);
+    coords.resize(std::distance(coords.begin(), it));
+
+    return true;
 }
 
 std::ostream& operator<<(std::ostream &out, const Board &b)

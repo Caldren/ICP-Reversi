@@ -5,6 +5,7 @@
 #include <sstream>
 #include "Game.hpp"
 #include "Coordinate.hpp"
+#include "AI.hpp"
 
 Game::Game(int size)
 {
@@ -52,9 +53,12 @@ void Game::initGame()
         m_p1->addToScore(2);
     if(m_p2->getScore() == 0)
         m_p2->addToScore(2);
+
+    if(m_curr_p->getType() == Player::AI)
+        getAITurn();
 }
 
-void Game::addPlayer(const std::string &name, int score, int color)
+void Game::addPlayer(const std::string &name, int type, int score, int color)
 {
     if(m_p1 != nullptr && m_p2 != nullptr)
         throw std::range_error("All player slots are full");
@@ -68,7 +72,11 @@ void Game::addPlayer(const std::string &name, int score, int color)
 
     Player **p = (m_p1 == nullptr) ? &m_p1 : &m_p2;
 
-    *p = new Player(name, color, Player::HUMAN);
+    if(type == Player::HUMAN)
+        *p = new Player(name, color);
+    else if(type == Player::AI)
+        *p = new AI(name, color);
+
     (*p)->setScore(score);
 
     if(m_curr_p == nullptr)
@@ -82,7 +90,7 @@ bool Game::playerTurn(int row, int col)
     std::vector<Coordinate> coords;
     int player_color = getCurrentPlayer()->getColor();
 
-    if(!checkTurn(row, col, coords, player_color))
+    if(!m_board->checkTurn(row, col, coords, player_color))
         return false;
 
     // Set all taken stones to player's color
@@ -91,9 +99,6 @@ bool Game::playerTurn(int row, int col)
 
     // Set the placed stone to player's color
     m_board->setField(row, col, player_color);
-
-    // TODO: Remove
-    std::cout << *m_board << std::endl;
 
     // Add taken stones to player's score and
     // subtract them from opponent's score
@@ -209,6 +214,9 @@ void Game::switchPlayers()
 
     if(checkGameEnd())
         return;
+
+    if(m_curr_p->getType() == Player::AI)
+        getAITurn();
 }
 
 const Board *Game::getBoard()
@@ -315,157 +323,6 @@ bool Game::load(const std::string &filename, std::string &error)
     return true;
 }
 
-bool Game::checkTurn(int row, int col, std::vector<Coordinate> &coords, int c)
-{
-    std::vector<Coordinate> temp;
-    int player_color = c;
-    int opponent_color = (c == Color::BLACK) ? Color::WHITE : Color::BLACK;
-    int color;
-
-    // Can't place a stone on a non-empty field
-    // getField() also throws an exception on invalid coords
-    try {
-        if(m_board->getField(row, col) != Color::EMPTY)
-            return false;
-    } catch(...) {
-        return false;
-    }
-
-    // horizontal, left
-    for(int i = col - 1; i >= 0; i--) {
-        color = m_board->getField(row, i);
-        if(color == player_color) {
-            coords.insert(coords.end(), temp.begin(), temp.end());
-            break;
-        }
-
-        if(color != opponent_color)
-            break;
-
-        temp.push_back(Coordinate(row, i));
-    }
-
-    temp.clear();
-    // horizontal, right
-    for(int i = col + 1; i < m_board->getSize(); i++) {
-        color = m_board->getField(row, i);
-        if(color == player_color) {
-            coords.insert(coords.end(), temp.begin(), temp.end());
-            break;
-        }
-
-        if(color != opponent_color)
-            break;
-
-        temp.push_back(Coordinate(row, i));
-    }
-
-    temp.clear();
-    // vertical, up
-    for(int i = row - 1; i >= 0; i--) {
-        color = m_board->getField(i, col);
-        if(color == player_color) {
-            coords.insert(coords.end(), temp.begin(), temp.end());
-            break;
-        }
-
-        if(color != opponent_color)
-            break;
-
-        temp.push_back(Coordinate(i, col));
-    }
-
-    temp.clear();
-    // vertical, down
-    for(int i = row + 1; i < m_board->getSize(); i++) {
-        color = m_board->getField(i, col);
-        if(color == player_color) {
-            coords.insert(coords.end(), temp.begin(), temp.end());
-            break;
-        }
-
-        if(color != opponent_color)
-            break;
-
-        temp.push_back(Coordinate(i, col));
-    }
-
-    temp.clear();
-    // left diagonal, up
-    for(int i = row - 1, j = col - 1; i >= 0 && j >= 0; i--, j--) {
-        color = m_board->getField(i, j);
-        if(color == player_color) {
-            coords.insert(coords.end(), temp.begin(), temp.end());
-            break;
-        }
-
-        if(color != opponent_color)
-            break;
-
-        temp.push_back(Coordinate(i, j));
-    }
-
-    temp.clear();
-    // left diagonal, down
-    for(int i = row + 1, j = col + 1; i < m_board->getSize() &&
-            j < m_board->getSize(); i++, j++) {
-        color = m_board->getField(i, j);
-        if(color == player_color) {
-            coords.insert(coords.end(), temp.begin(), temp.end());
-            break;
-        }
-
-        if(color != opponent_color)
-            break;
-
-        temp.push_back(Coordinate(i, j));
-    }
-
-    temp.clear();
-    // right diagonal, up
-    for(int i = row - 1, j = col + 1; i >= 0 && j < m_board->getSize();
-            i--, j++) {
-        color = m_board->getField(i, j);
-        if(color == player_color) {
-            coords.insert(coords.end(), temp.begin(), temp.end());
-            break;
-        }
-
-        if(color != opponent_color)
-            break;
-
-        temp.push_back(Coordinate(i, j));
-    }
-
-    temp.clear();
-    // right diagonal, down
-    for(int i = row + 1, j = col - 1; i < m_board->getSize() && j >= 0;
-            i++, j--) {
-        color = m_board->getField(i, j);
-        if(color == player_color) {
-            coords.insert(coords.end(), temp.begin(), temp.end());
-            break;
-        }
-
-        if(color != opponent_color)
-            break;
-
-        temp.push_back(Coordinate(i, j));
-    }
-
-    // Player has to take at least one opponent's stone
-    if(coords.size() == 0)
-        return false;
-
-    // Sort coords vector and remove duplicates
-    std::vector<Coordinate>::iterator it;
-    std::sort(coords.begin(), coords.end(), Coordinate::comp);
-    it = std::unique(coords.begin(), coords.end(), Coordinate::comp);
-    coords.resize(std::distance(coords.begin(), it));
-
-    return true;
-}
-
 bool Game::checkGameEnd()
 {
     m_game_over = false;
@@ -519,11 +376,21 @@ bool Game::checkPossibleTurn(int color)
         for(int j = 0; j < m_board->getSize(); j++) {
             if(m_board->getField(i, j) == Color::EMPTY) {
                 // Check for possible moves on current coords
-                if(checkTurn(i, j, coords, color))
+                if(m_board->checkTurn(i, j, coords, color))
                     return false;
             }
         }
     }
 
     return true;
+}
+
+void Game::getAITurn()
+{
+    Coordinate coord;
+    coord = m_curr_p->makeTurn(m_board);
+    if(coord.x == -1 || coord.y == -1)
+        throw std::runtime_error("AI algorithm error - invalid coords");
+
+    playerTurn(coord.x, coord.y);
 }

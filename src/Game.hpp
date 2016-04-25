@@ -16,7 +16,8 @@ public:
     ~Game();
 
     void initGame();
-    void addPlayer(const std::string &name, int score = 0, int color = -1);
+    void addPlayer(const std::string &name, int type = Player::HUMAN,
+                   int score = 0, int color = -1);
     bool playerTurn(int row, int col);
     bool skipTurn(int color = -1);
     bool prevTurn();
@@ -35,21 +36,10 @@ public:
     bool save(const std::string &filename, std::string &error);
     bool load(const std::string &filename, std::string &error);
 
-    // TODO: Remove
-    void loadMap(int map[][8], int size) {
-        for(int i = 0; i < size; i++) {
-            for(int j = 0; j < size; j++) {
-                m_board->setField(i, j, map[i][j]);
-            }
-        }
-
-        std::cout << *m_board << std::endl;
-    }
-
 private:
-    bool checkTurn(int row, int col, std::vector<Coordinate> &coords, int c);
     bool checkGameEnd();
     bool checkPossibleTurn(int color);
+    void getAITurn();
 
 public:
 
