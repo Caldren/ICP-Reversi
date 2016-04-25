@@ -21,6 +21,11 @@ int AI::getAlgorithmCount()
     return m_algorithms.size();
 }
 
+int AI::getAlgorithm()
+{
+    return m_curr_algo;
+}
+
 void AI::setAlgorithm(int id)
 {
     if(id < 0 || id > (int)(m_algorithms.size() - 1))

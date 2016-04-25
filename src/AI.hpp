@@ -10,6 +10,7 @@ public:
     Coordinate makeTurn(const Board *b);
 
     int getAlgorithmCount();
+    int getAlgorithm();
     void setAlgorithm(int id);
 
 private:

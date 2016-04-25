@@ -260,9 +260,13 @@ bool Game::save(const std::string &filename, std::string &error)
         return false;
     }
 
-    out << m_board->getSize() << '\n'
-        << m_p1->getType() << '\t' << m_p1->getName() << '\n'
-        << m_p2->getType() << '\t' << m_p2->getName() << '\n';
+    out << m_board->getSize() << '\n';
+    for(auto p : std::vector<Player*>{m_p1, m_p2}) {
+        out << p->getType() << '\t' << p->getName();
+        if(p->getType() == Player::AI)
+            out << '\t' << ((AI*)p)->getAlgorithm();
+        out << '\n';
+    }
 
     const std::vector<HistoryItem> *h = m_history.getData();
     for(auto item : *h) {
@@ -298,15 +302,22 @@ bool Game::load(const std::string &filename, std::string &error)
         for(unsigned int i = 0; i < 2; i++) {
             std::getline(in, input, '\t');
             type = std::stoi(input);
-            std::getline(in, input, '\n');
-            name = input;
 
-            if(type == Player::HUMAN)
+            if(type == Player::HUMAN) {
+                std::getline(in, input, '\n');
+                name = input;
                 addPlayer(name);
-            else if(type == Player::AI)
-                addPlayer(name, Player::AI);
-            else
+            } else if(type == Player::AI) {
+                int idx = -1;
+                std::getline(in, input, '\t');
+                name = input;
+                std::getline(in, input, '\n');
+                idx = std::stoi(input);
+                const Player *p = addPlayer(name, Player::AI);
+                ((AI*)p)->setAlgorithm(idx);
+            } else {
                 throw std::runtime_error("Invalid player type");
+            }
         }
 
         initGame(true);

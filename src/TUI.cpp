@@ -207,7 +207,7 @@ void TUI::gameControl()
                   << "b\tPrevious turn from history" << std::endl
                   << "f\tNext turn from history" << std::endl
                   << "v\tSave current game" << std::endl
-                  << "q\tQuit" << std::endl;
+                  << "q\tQuit" << std::endl << std::endl;
         if(state.size() > 0) {
             std::cout << state << std::endl;
             state = "";
