@@ -25,8 +25,10 @@ private:
     void initBoard(int size);
     void initBoardArray();
 
-private:
+public:
     static const std::set<int> SIZES;
+
+private:
     int m_size;
     Color **m_board = nullptr;
 };

@@ -15,6 +15,8 @@
 #include <QComboBox>
 #include <iostream>
 #include "GUI.hpp"
+#include "AI.hpp"
+#include "Game.hpp"
 
 GUI::GUI() : bg(new QLabel)
 {
@@ -25,6 +27,12 @@ GUI::GUI() : bg(new QLabel)
     setCentralWidget(bg);
 
     createMenus();
+}
+
+GUI::~GUI()
+{
+    delete game;
+    game = nullptr;
 }
 
 void GUI::createMenus()
@@ -60,13 +68,27 @@ void GUI::sNewGame()
     int AIalgorithmCount = 2; // TODO
 
     pobj.clear();
+
+    QGroupBox *sizes = new QGroupBox(tr("Board size"));
+    QGridLayout *sizesLayout = new QGridLayout;
+    QComboBox *sizesList = new QComboBox;
+    for(auto s : Board::SIZES) {
+        QString ss = QString::number(s);
+        sizesList->addItem(ss + " x " + ss);
+    }
+
+    sizesLayout->addWidget(sizesList);
+    sizes->setLayout(sizesLayout);
+    mainLayout->addWidget(sizes);
+
     QGroupBox *algo = new QGroupBox(tr("AI algorithms"));
     QGridLayout *algoLayout = new QGridLayout;
-    QComboBox *algoList = new QComboBox;
+    algoList = new QComboBox;
     for(int i = 0; i < AIalgorithmCount; i++) {
         algoList->addItem("Algorithm " + QString::number(i));
     }
 
+    algoList->setEnabled(false);
     algoLayout->addWidget(algoList);
     algo->setLayout(algoLayout);
     mainLayout->addWidget(algo);
@@ -82,6 +104,8 @@ void GUI::sNewGame()
         QLabel *typeLabel = new QLabel(tr("Type:"));
         QRadioButton *human = new QRadioButton(tr("Human"));
         QRadioButton *ai = new QRadioButton(tr("AI"));
+        connect(ai, SIGNAL(toggled(bool)), this,
+                SLOT(sCheckAIButtons(bool)));
         human->setChecked(true);
         innerLayout->addWidget(typeLabel, 1, 0);
         innerLayout->addWidget(human, 1, 1);
@@ -103,8 +127,24 @@ void GUI::sNewGame()
     if(dialog.exec() != QDialog::Accepted || pobj.size() != 2)
         return;
 
-    for(auto p : pobj) {
-        std::cout << p.name->text().toStdString() << std::endl;
+    if(game != nullptr) {
+        delete game;
+        game = nullptr;
+    }
+
+    // Get board size from list index
+    std::set<int>::iterator it = Board::SIZES.begin();
+    std::advance(it, sizesList->currentIndex());
+    game = new Game(*it);
+
+    const Player *p;
+    for(auto player : pobj) {
+        if(player.human->isChecked()) {
+            game->addPlayer(player.name->text().toStdString());
+        } else {
+            p = game->addPlayer(player.name->text().toStdString(), Player::AI);
+            ((AI*)p)->setAlgorithm(algoList->currentIndex());
+        }
     }
 }
 
@@ -116,10 +156,12 @@ void GUI::sSaveGame()
     if(dialog.exec() != QDialog::Accepted)
         return;
 
-    QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
-            dialog.selectedFiles().first());
-
-    // TODO: Save game
+    std::string error;
+    if(!game->save(dialog.selectedFiles().first().toStdString(), error)) {
+        QMessageBox::critical(this, QGuiApplication::applicationDisplayName(),
+                tr("Couldn't save current game to %1\nReason: %2").arg(
+                    dialog.selectedFiles().first()).arg(error.c_str()));
+    }
 }
 
 void GUI::sLoadGame()
@@ -129,10 +171,18 @@ void GUI::sLoadGame()
     if(dialog.exec() != QDialog::Accepted)
         return;
 
-    QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
-            dialog.selectedFiles().first());
+    if(game != nullptr) {
+        delete game;
+        game = nullptr;
+    }
 
-    // TODO: Load game
+    try {
+        game = new Game(dialog.selectedFiles().first().toStdString());
+    } catch(std::exception &e) {
+        QMessageBox::critical(this, QGuiApplication::applicationDisplayName(),
+                tr("Couldn't load saved game from %1\nReason: %2").arg(
+                    dialog.selectedFiles().first()).arg(e.what()));
+    }
 }
 
 void GUI::sQuit()
@@ -152,5 +202,25 @@ void GUI::sTurnPrev()
 
 void GUI::sTurnNext()
 {
+
+}
+
+void GUI::sCheckAIButtons(bool checked)
+{
+    if(pobj.size() != 2)
+        return;
+
+    if(checked)
+        algoList->setEnabled(true);
+
+    if(pobj[0].ai->isChecked()) {
+        pobj[1].ai->setEnabled(false);
+    } else if(pobj[1].ai->isChecked()) {
+        pobj[0].ai->setEnabled(false);
+    } else {
+        pobj[0].ai->setEnabled(true);
+        pobj[1].ai->setEnabled(true);
+        algoList->setEnabled(false);
+    }
 
 }

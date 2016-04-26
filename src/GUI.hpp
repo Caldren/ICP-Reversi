@@ -15,6 +15,7 @@ class GUI : public QMainWindow {
 Q_OBJECT
 public:
     GUI();
+    ~GUI();
     void createMenus();
 
 private:
@@ -34,10 +35,12 @@ private slots:
     void sTurnSkip();
     void sTurnPrev();
     void sTurnNext();
+    void sCheckAIButtons(bool checked);
 
 private:
-    Game *game;
+    Game *game = nullptr;
     std::vector<PlayerObjects> pobj;
+    QComboBox *algoList;
     QLabel *bg;
     QAction *saveGame;
     QAction *turnSkip;
