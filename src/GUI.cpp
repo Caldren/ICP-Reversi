@@ -4,7 +4,16 @@
 #include <QLabel>
 #include <QObject>
 #include <QMessageBox>
-
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QVBoxLayout>
+#include <QLayout>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QDialogButtonBox>
+#include <QRadioButton>
+#include <QComboBox>
+#include <iostream>
 #include "GUI.hpp"
 
 GUI::GUI() : bg(new QLabel)
@@ -46,7 +55,57 @@ void GUI::createMenus()
 
 void GUI::sNewGame()
 {
+    QDialog dialog;
+    QVBoxLayout *mainLayout = new QVBoxLayout;
+    int AIalgorithmCount = 2; // TODO
 
+    pobj.clear();
+    QGroupBox *algo = new QGroupBox(tr("AI algorithms"));
+    QGridLayout *algoLayout = new QGridLayout;
+    QComboBox *algoList = new QComboBox;
+    for(int i = 0; i < AIalgorithmCount; i++) {
+        algoList->addItem("Algorithm " + QString::number(i));
+    }
+
+    algoLayout->addWidget(algoList);
+    algo->setLayout(algoLayout);
+    mainLayout->addWidget(algo);
+
+    for(int i = 0; i < 2; i++) {
+        QGridLayout *innerLayout = new QGridLayout;
+        QGroupBox *gb = new QGroupBox(tr("Player %1").arg(i + 1));
+        QLabel *nameLabel = new QLabel(tr("Name:"));
+        QLineEdit *nameEdit = new QLineEdit;
+        nameEdit->setMaxLength(12);
+        innerLayout->addWidget(nameLabel, 0, 0);
+        innerLayout->addWidget(nameEdit, 0, 1, 1, 2);
+        QLabel *typeLabel = new QLabel(tr("Type:"));
+        QRadioButton *human = new QRadioButton(tr("Human"));
+        QRadioButton *ai = new QRadioButton(tr("AI"));
+        human->setChecked(true);
+        innerLayout->addWidget(typeLabel, 1, 0);
+        innerLayout->addWidget(human, 1, 1);
+        innerLayout->addWidget(ai, 1, 2);
+
+        pobj.push_back(PlayerObjects(nameEdit, human, ai));
+        gb->setLayout(innerLayout);
+        mainLayout->addWidget(gb);
+    }
+
+    QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok|
+                                                     QDialogButtonBox::Cancel);
+    connect(buttons, SIGNAL(accepted()), &dialog, SLOT(accept()));
+    connect(buttons, SIGNAL(rejected()), &dialog, SLOT(reject()));
+    mainLayout->addWidget(buttons);
+
+    dialog.setLayout(mainLayout);
+    dialog.setModal(true);
+    if(dialog.exec() != QDialog::Accepted || pobj.size() != 2)
+        return;
+
+    for(auto p : pobj) {
+        std::cout << p.name->text().toStdString() << std::endl;
+    }
 }
 
 void GUI::sSaveGame()
