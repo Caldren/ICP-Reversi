@@ -15,6 +15,8 @@
 #include <vector>
 #include "Game.hpp"
 
+class BoardSquare;
+
 class GUI : public QMainWindow {
 Q_OBJECT
 public:
@@ -50,6 +52,7 @@ private:
     QGraphicsScene *qscene;
     QGraphicsView *qview;
     std::vector<PlayerObjects> pobj;
+    std::vector<BoardSquare*> bitems;
     QComboBox *algoList;
     QAction *saveGame;
     QAction *turnSkip;
@@ -72,13 +75,21 @@ public:
         return QRectF(0, 0, w, w);
     }
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
             QWidget *widget) {
         QBrush b = painter->brush();
+        QPen p(QColor::fromRgb(0, 0, 0));
+        p.setWidth(2);
         painter->setBrush(color);
+        painter->setPen(p);
         painter->drawRect(0, 0, w, w);
         painter->fillRect(this->boundingRect(), color);
         painter->setBrush(b);
+    }
+
+    void setColor(QColor &color) {
+        this->color = color;
+        QGraphicsItem::update();
     }
 
 public:

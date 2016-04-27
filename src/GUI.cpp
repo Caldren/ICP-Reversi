@@ -86,19 +86,20 @@ void GUI::drawBoard()
 
     setFixedSize(boardSize * sqSize + 10, boardSize * sqSize + 40);
     initView();
+    bitems.clear();
 
-    QBrush blackBrush(Qt::black);
-    QBrush whiteBrush(Qt::white);
+    QColor c(Qt::green);
     for(int i = 0; i < boardSize; i++) {
         for(int j = 0; j < boardSize; j++) {
-            QColor c = (((i + 1) + j) % 2 == 0) ? QColor::fromRgb(0, 0, 0) :
-                                            QColor::fromRgb(255, 255, 255);
-            QGraphicsItem *it = new BoardSquare(c, sqSize, i, j);
+            BoardSquare *it = new BoardSquare(c, sqSize, i, j);
             it->setPos(QPointF(i * sqSize, j * sqSize));
             qscene->addItem(it);
+            bitems.push_back(it);
         }
     }
 
+    QColor c1(Qt::black);
+    bitems[boardSize * 1 + 4]->setColor(c1);
 }
 
 void GUI::sNewGame()
