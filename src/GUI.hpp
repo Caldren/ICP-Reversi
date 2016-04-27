@@ -13,6 +13,7 @@
 #include <QGraphicsScene>
 #include <QPainter>
 #include <vector>
+#include "GUIObjects.hpp"
 #include "Game.hpp"
 
 class BoardSquare;
@@ -27,6 +28,9 @@ private:
     void initView();
     void createMenus();
     void drawBoard();
+    void updateBoard();
+    void enableHistory();
+    void updateStatusBar();
 
     class PlayerObjects {
     public:
@@ -38,6 +42,7 @@ private:
     };
 
 private slots:
+    void sHandleBoardEvent(int x, int y);
     void sNewGame();
     void sSaveGame();
     void sLoadGame();
@@ -48,6 +53,7 @@ private slots:
     void sCheckAIButtons(bool checked);
 
 private:
+    const int sqSize = 60;
     Game *game = nullptr;
     QGraphicsScene *qscene;
     QGraphicsView *qview;
@@ -58,55 +64,9 @@ private:
     QAction *turnSkip;
     QAction *turnPrev;
     QAction *turnNext;
-};
-
-class BoardSquare : public QWidget, public QGraphicsItem {
-Q_OBJECT
-public:
-    BoardSquare(const QColor &color, int w, int x, int y) {
-        this->x = x;
-        this->y = y;
-        this->w = w;
-        this->color = color;
-        setAcceptedMouseButtons(Qt::LeftButton);
-    }
-
-    QRectF boundingRect() const {
-        return QRectF(0, 0, w, w);
-    }
-
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-            QWidget *widget) {
-        QBrush b = painter->brush();
-        QPen p(QColor::fromRgb(0, 0, 0));
-        p.setWidth(2);
-        painter->setBrush(color);
-        painter->setPen(p);
-        painter->drawRect(0, 0, w, w);
-        painter->fillRect(this->boundingRect(), color);
-        painter->setBrush(b);
-    }
-
-    void setColor(QColor &color) {
-        this->color = color;
-        QGraphicsItem::update();
-    }
-
-public:
-    QColor color;
-
-private:
-    int w;
-    int x;
-    int y;
-
-protected:
-    void mousePressEvent(QGraphicsSceneMouseEvent *event) {
-        QGraphicsItem::mouseMoveEvent(event);
-        this->color = QColor::fromRgb(255, 0, 0);
-        QGraphicsItem::update();
-        std::cout << "EVENT <" << x << ";" << y << ">" << std::endl << std::endl;
-    }
+    QLabel *statusLeft;
+    QLabel *statusMiddle;
+    QLabel *statusRight;
 };
 
 #endif

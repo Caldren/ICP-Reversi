@@ -18,6 +18,7 @@ HEADERS += AI.hpp \
            Coordinate.hpp \
            Game.hpp \
            GUI.hpp \
+           GUIObjects.hpp \
            History.hpp \
            HistoryItem.hpp \
            Player.hpp

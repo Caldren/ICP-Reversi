@@ -16,15 +16,21 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsItem>
+#include <QStatusBar>
 #include <iostream>
 #include "GUI.hpp"
 #include "AI.hpp"
 #include "Game.hpp"
 
-GUI::GUI()
+GUI::GUI() : statusLeft(new QLabel), statusMiddle(new QLabel),
+    statusRight(new QLabel)
 {
     qscene = nullptr;
-
+    statusBar()->setSizeGripEnabled(false);
+    statusMiddle->setAlignment(Qt::AlignCenter);
+    statusBar()->addWidget(statusLeft);
+    statusBar()->addWidget(statusMiddle, 1);
+    statusBar()->addWidget(statusRight);
     setFixedSize(800, 600);
 
     initView();
@@ -44,7 +50,7 @@ void GUI::createMenus()
             SLOT(sNewGame()), QKeySequence("n"));
     saveGame = gameMenu->addAction(tr("Sa&ve game"), this,
             SLOT(sSaveGame()), QKeySequence("v"));
-    saveGame->setEnabled(true);
+    saveGame->setEnabled(false);
     QAction *loadGame = gameMenu->addAction(tr("&Load game"), this,
             SLOT(sLoadGame()), QKeySequence("l"));
     gameMenu->addSeparator();
@@ -72,6 +78,9 @@ void GUI::initView()
 
     qscene = new QGraphicsScene(this);
     qview = new QGraphicsView(qscene);
+    qview->setRenderHint(QPainter::Antialiasing, false);
+    qview->setOptimizationFlags(QGraphicsView::DontSavePainterState);
+    qview->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
 
     setCentralWidget(qview);
 }
@@ -81,10 +90,10 @@ void GUI::drawBoard()
     if(game == nullptr)
         return;
 
-    int boardSize = game->getBoard()->getSize();
-    const int sqSize = 60;
+    const Board *b = game->getBoard();
+    int boardSize = b->getSize();
 
-    setFixedSize(boardSize * sqSize + 10, boardSize * sqSize + 40);
+    setFixedSize(boardSize * sqSize + 10, boardSize * sqSize + 60);
     initView();
     bitems.clear();
 
@@ -92,14 +101,88 @@ void GUI::drawBoard()
     for(int i = 0; i < boardSize; i++) {
         for(int j = 0; j < boardSize; j++) {
             BoardSquare *it = new BoardSquare(c, sqSize, i, j);
-            it->setPos(QPointF(i * sqSize, j * sqSize));
+            it->setPos(QPointF(j * sqSize, i * sqSize));
             qscene->addItem(it);
             bitems.push_back(it);
+
+            int fcolor = b->getField(i, j);
+            if(fcolor != Color::EMPTY) {
+                BoardCircle *c = new BoardCircle(fcolor, sqSize - 20);
+                c->setPos(QPointF(10, 10));
+                c->setParentItem(it);
+            }
+            connect(it, SIGNAL(mousePressed(int, int)), this,
+                    SLOT(sHandleBoardEvent(int, int)));
         }
     }
 
-    QColor c1(Qt::black);
-    bitems[boardSize * 1 + 4]->setColor(c1);
+    updateStatusBar();
+}
+
+void GUI::updateBoard()
+{
+    const Board *b = game->getBoard();
+    int boardSize = b->getSize();
+
+    for(int i = 0; i < boardSize; i++) {
+        for(int j = 0; j < boardSize; j++) {
+            BoardSquare *it = bitems[i * boardSize + j];
+            int fcolor = b->getField(i, j);
+
+            for(auto c : it->childItems()) {
+               c->setParentItem(0);
+               delete c;
+            }
+
+            if(fcolor != Color::EMPTY) {
+                if(it->childItems().size() != 0) {
+                    for(auto c : it->childItems()) {
+                        c->setParentItem(0);
+                        delete c;
+                    }
+                }
+
+                BoardCircle *c = new BoardCircle(fcolor, sqSize - 20);
+                c->setPos(QPointF(10, 10));
+                c->setParentItem(it);
+            }
+        }
+    }
+}
+
+void GUI::enableHistory()
+{
+    turnPrev->setEnabled(true);
+    turnNext->setEnabled(true);
+    turnSkip->setEnabled(true);
+    saveGame->setEnabled(true);
+}
+
+void GUI::updateStatusBar()
+{
+    if(game == nullptr)
+        return;
+
+    const Player *p1 = game->getP1();
+    const Player *p2 = game->getP2();
+
+    if(p1 == nullptr || p2 == nullptr)
+        return;
+
+    statusLeft->setText(tr("%1: %2").arg(p1->getName().c_str()).arg(
+                p1->getScore()));
+    statusRight->setText(tr("%1: %2").arg(p2->getName().c_str()).arg(
+                p2->getScore()));
+    statusMiddle->setText(game->getCurrentPlayer()->getName().c_str());
+
+}
+
+void GUI::sHandleBoardEvent(int x, int y)
+{
+    std::cout << "Handling event for " << x << ";" << y << std::endl;
+    game->playerTurn(x, y);
+    updateBoard();
+    updateStatusBar();
 }
 
 void GUI::sNewGame()
@@ -194,6 +277,9 @@ void GUI::sNewGame()
         }
     }
 
+    game->initGame();
+
+    enableHistory();
     drawBoard();
 }
 
@@ -227,6 +313,8 @@ void GUI::sLoadGame()
 
     try {
         game = new Game(dialog.selectedFiles().first().toStdString());
+        enableHistory();
+        drawBoard();
     } catch(std::exception &e) {
         QMessageBox::critical(this, QGuiApplication::applicationDisplayName(),
                 tr("Couldn't load saved game from %1\nReason: %2").arg(
@@ -259,6 +347,8 @@ void GUI::sTurnPrev()
     if(!game->prevTurn()) {
         QMessageBox::warning(this, QGuiApplication::applicationDisplayName(),
                 "No previous turn available in history buffer");
+    } else {
+        updateBoard();
     }
 }
 
@@ -270,6 +360,8 @@ void GUI::sTurnNext()
     if(!game->nextTurn()) {
         QMessageBox::warning(this, QGuiApplication::applicationDisplayName(),
                 "No next turn available in history buffer");
+    } else {
+        updateBoard();
     }
 }
 
