@@ -148,6 +148,8 @@ void GUI::updateBoard()
             }
         }
     }
+
+    updateStatusBar();
 }
 
 void GUI::enableHistory()
@@ -173,13 +175,19 @@ void GUI::updateStatusBar()
                 p1->getScore()));
     statusRight->setText(tr("%1: %2").arg(p2->getName().c_str()).arg(
                 p2->getScore()));
-    statusMiddle->setText(game->getCurrentPlayer()->getName().c_str());
+
+    if(game->isGameOver()) {
+        const Player *w = game->getWinner();
+        const char *msg = (w == nullptr) ? "DRAW" : w->getName().c_str();
+        statusMiddle->setText(tr("WINNER: %1").arg(msg));
+    } else {
+        statusMiddle->setText(game->getCurrentPlayer()->getName().c_str());
+    }
 
 }
 
 void GUI::sHandleBoardEvent(int x, int y)
 {
-    std::cout << "Handling event for " << x << ";" << y << std::endl;
     game->playerTurn(x, y);
     updateBoard();
     updateStatusBar();
@@ -336,6 +344,8 @@ void GUI::sTurnSkip()
         QMessageBox::warning(this, QGuiApplication::applicationDisplayName(),
                 "Can't skip current turn - at least one valid move is "
                 "available");
+    } else {
+        updateBoard();
     }
 }
 
