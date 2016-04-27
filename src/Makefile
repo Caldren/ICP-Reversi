@@ -8,7 +8,6 @@ export PATH := /usr/local/share/Qt-5.5.1/5.5/gcc_64/bin:${PATH}
 CC=g++-5.3
 QMAKE=qmake
 CFLAGS=-std=c++11 -O2 -static-libstdc++
-QMAKE_SPECIALS="CONFIG+=static"
 endif
 
 GUI_BUILD_DIR=gui_build/
@@ -17,7 +16,7 @@ EXEC=hra2016-cli hra2016
 all: $(EXEC)
 
 hra2016:
-	$(QMAKE) GUI.pro ${QMAKE_SPECIALS} -o Makefile.qt5
+	$(QMAKE) GUI.pro -o Makefile.qt5
 	make -f Makefile.qt5
 	mv $@ ../$@
 
