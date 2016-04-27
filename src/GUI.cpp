@@ -31,7 +31,7 @@ GUI::GUI() : statusLeft(new QLabel), statusMiddle(new QLabel),
     statusBar()->addWidget(statusLeft);
     statusBar()->addWidget(statusMiddle, 1);
     statusBar()->addWidget(statusRight);
-    setFixedSize(800, 600);
+    setFixedSize(320, 240);
 
     initView();
     createMenus();

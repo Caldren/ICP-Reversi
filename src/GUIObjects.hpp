@@ -76,6 +76,7 @@ public:
         QPen p(Qt::black, 2);
         painter->setPen(p);
         painter->setBrush(color);
+        painter->setRenderHint(QPainter::Antialiasing);
         painter->drawEllipse(boundingRect());
     }
 
