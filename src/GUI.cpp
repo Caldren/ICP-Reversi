@@ -97,7 +97,7 @@ void GUI::drawBoard()
     initView();
     bitems.clear();
 
-    QColor c(Qt::green);
+    QColor c(34, 132, 43);
     for(int i = 0; i < boardSize; i++) {
         for(int j = 0; j < boardSize; j++) {
             BoardSquare *it = new BoardSquare(c, sqSize, i, j);
