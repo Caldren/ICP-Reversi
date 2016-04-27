@@ -4,8 +4,6 @@
 AI::AI(const std::string &name, int color) : Player(name, color)
 {
     setType(Player::AI);
-    m_algorithms.push_back(&AI::algorithm1);
-    m_algorithms.push_back(&AI::algorithm2);
 }
 
 Coordinate AI::makeTurn(const Board *b)
@@ -85,3 +83,8 @@ Coordinate AI::algorithm2(const Board *b)
 
     return Coordinate(x, y);
 }
+
+std::vector<Coordinate (AI::*)(const Board *b)> AI::m_algorithms = {
+    &AI::algorithm1,
+    &AI::algorithm2
+};

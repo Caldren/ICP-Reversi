@@ -3,6 +3,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
 #include "Game.hpp"
 #include "Coordinate.hpp"
 #include "AI.hpp"

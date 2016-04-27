@@ -7,13 +7,13 @@
 #include "Coordinate.hpp"
 #include "History.hpp"
 
-// TODO: Copy & move constructors
-
 class Game {
 public:
     Game(int size = 8);
     Game(const std::string &filename);
+    Game(const Game &) = delete;
     ~Game();
+    void operator=(const Game &) = delete;
 
     void initGame(bool load = false);
     const Player *addPlayer(const std::string &name, int type = Player::HUMAN,

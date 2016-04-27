@@ -197,7 +197,7 @@ void GUI::sNewGame()
 {
     QDialog dialog;
     QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
-    int AIalgorithmCount = 2; // TODO
+    int AIalgorithmCount = AI::getAlgorithmCount();
 
     pobj.clear();
 
@@ -217,7 +217,7 @@ void GUI::sNewGame()
     QGridLayout *algoLayout = new QGridLayout;
     algoList = new QComboBox;
     for(int i = 0; i < AIalgorithmCount; i++) {
-        algoList->addItem("Algorithm " + QString::number(i));
+        algoList->addItem(tr("Algorithm %1").arg(i + 1));
     }
 
     algoList->setEnabled(false);

@@ -97,7 +97,7 @@ void TUI::playerPrompt(int id)
                     m_game->addPlayer(str);
                 } else {
                     p = m_game->addPlayer(str, Player::AI);
-                    range = ((AI*)p)->getAlgorithmCount() - 1;
+                    range = AI::getAlgorithmCount() - 1;
                     if(range < 0) {
                         throw std::runtime_error("No AI algorithms available");
                     }
