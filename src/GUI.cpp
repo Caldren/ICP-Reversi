@@ -13,26 +13,28 @@
 #include <QDialogButtonBox>
 #include <QRadioButton>
 #include <QComboBox>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QGraphicsItem>
 #include <iostream>
 #include "GUI.hpp"
 #include "AI.hpp"
 #include "Game.hpp"
 
-GUI::GUI() : bg(new QLabel)
+GUI::GUI()
 {
+    qscene = nullptr;
+
     setFixedSize(800, 600);
-    bg->setBackgroundRole(QPalette::Base);
-    bg->setScaledContents(true);
 
-    setCentralWidget(bg);
-
+    initView();
     createMenus();
 }
 
 GUI::~GUI()
 {
     delete game;
-    game = nullptr;
+    delete qscene;
 }
 
 void GUI::createMenus()
@@ -61,10 +63,48 @@ void GUI::createMenus()
     turnNext->setEnabled(false);
 }
 
+void GUI::initView()
+{
+    if(qscene != nullptr) {
+        delete qscene;
+        qscene = nullptr;
+    }
+
+    qscene = new QGraphicsScene(this);
+    qview = new QGraphicsView(qscene);
+
+    setCentralWidget(qview);
+}
+
+void GUI::drawBoard()
+{
+    if(game == nullptr)
+        return;
+
+    int boardSize = game->getBoard()->getSize();
+    const int sqSize = 60;
+
+    setFixedSize(boardSize * sqSize + 10, boardSize * sqSize + 40);
+    initView();
+
+    QBrush blackBrush(Qt::black);
+    QBrush whiteBrush(Qt::white);
+    for(int i = 0; i < boardSize; i++) {
+        for(int j = 0; j < boardSize; j++) {
+            QColor c = (((i + 1) + j) % 2 == 0) ? QColor::fromRgb(0, 0, 0) :
+                                            QColor::fromRgb(255, 255, 255);
+            QGraphicsItem *it = new BoardSquare(c, sqSize, i, j);
+            it->setPos(QPointF(i * sqSize, j * sqSize));
+            qscene->addItem(it);
+        }
+    }
+
+}
+
 void GUI::sNewGame()
 {
     QDialog dialog;
-    QVBoxLayout *mainLayout = new QVBoxLayout;
+    QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
     int AIalgorithmCount = 2; // TODO
 
     pobj.clear();
@@ -133,9 +173,15 @@ void GUI::sNewGame()
     }
 
     // Get board size from list index
-    std::set<int>::iterator it = Board::SIZES.begin();
-    std::advance(it, sizesList->currentIndex());
-    game = new Game(*it);
+    try {
+        std::set<int>::iterator it = Board::SIZES.begin();
+        std::advance(it, sizesList->currentIndex());
+        game = new Game(*it);
+    } catch(const std::exception &e) {
+        QMessageBox::critical(this, QGuiApplication::applicationDisplayName(),
+                tr("Couldn't create game board: ").arg(e.what()));
+        return;
+    }
 
     const Player *p;
     for(auto player : pobj) {
@@ -146,6 +192,8 @@ void GUI::sNewGame()
             ((AI*)p)->setAlgorithm(algoList->currentIndex());
         }
     }
+
+    drawBoard();
 }
 
 void GUI::sSaveGame()
@@ -192,17 +240,36 @@ void GUI::sQuit()
 
 void GUI::sTurnSkip()
 {
+    if(game == nullptr)
+        return;
 
+    if(!game->skipTurn()) {
+        QMessageBox::warning(this, QGuiApplication::applicationDisplayName(),
+                "Can't skip current turn - at least one valid move is "
+                "available");
+    }
 }
 
 void GUI::sTurnPrev()
 {
+    if(game == nullptr)
+        return;
 
+    if(!game->prevTurn()) {
+        QMessageBox::warning(this, QGuiApplication::applicationDisplayName(),
+                "No previous turn available in history buffer");
+    }
 }
 
 void GUI::sTurnNext()
 {
+    if(game == nullptr)
+        return;
 
+    if(!game->nextTurn()) {
+        QMessageBox::warning(this, QGuiApplication::applicationDisplayName(),
+                "No next turn available in history buffer");
+    }
 }
 
 void GUI::sCheckAIButtons(bool checked)
@@ -222,5 +289,4 @@ void GUI::sCheckAIButtons(bool checked)
         pobj[1].ai->setEnabled(true);
         algoList->setEnabled(false);
     }
-
 }
