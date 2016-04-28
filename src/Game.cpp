@@ -329,7 +329,6 @@ bool Game::load(const std::string &filename, std::string &error)
         initGame(true);
 
         while(std::getline(in, input)) {
-            std::cout << input << std::endl;
             std::vector<Coordinate> coords;
             std::istringstream is(input);
             is >> x >> y >> color;
