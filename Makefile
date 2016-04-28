@@ -12,11 +12,30 @@ doxygen:
 	doxygen conf/doxygen.conf
 
 run:
-	# Yet another hack for our school server
 ifndef DEBUG
+	# Yet another hack for our school server
 	cp conf/qt.conf .
 else
 	$(RM) qt.conf
 endif
-	./hra2016-cli &
-	./hra2016
+	./hra2016 &>/dev/null &
+	./hra2016-cli
+
+pack:
+	# Remove generated configuration if exists
+	$(RM) -r doc/*
+	# Create doc folder if it doesn't exist
+	mkdir -p doc/
+	# Remove archive if exists
+	$(RM) xsumsa01.tar.gz
+	# Create final archive
+	tar pczvf xsumsa01.tar.gz \
+		src/*.cpp \
+		src/*.hpp \
+		src/GUI.pro \
+		src/Makefile \
+		Makefile \
+		README.txt \
+		conf/*.conf \
+		examples/*.sav \
+		doc/
