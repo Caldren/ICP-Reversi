@@ -4,7 +4,7 @@ QMAKE=qmake-qt5
 CFLAGS=-std=c++11 -g -pedantic -Wall -Wextra
 else
 # Several necessary hacks due to school server's configuration
-export PATH := /usr/local/share/Qt-5.5.1/5.5/gcc_64/bin:${PATH}
+export PATH:=/usr/local/share/Qt-5.5.1/5.5/gcc_64/bin:${PATH}
 CC=g++-5.3
 QMAKE=qmake
 CFLAGS=-std=c++11 -O2 -static-libstdc++
