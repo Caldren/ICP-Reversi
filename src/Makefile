@@ -48,3 +48,4 @@ Player.o: Player.cpp Player.hpp
 clean:
 	$(RM) $(EXEC) *.o
 	make -i -f Makefile.qt5 clean
+	$(RM) -r gui_build/
