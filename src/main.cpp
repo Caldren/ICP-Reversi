@@ -1,3 +1,10 @@
+/**
+ * @file main.cpp
+ * @brief Simple main function for GUI game version.
+ *
+ * @author Frantisek Sumsal <xsumsa01@stud.fit.vutbr.cz>
+ * @date 28.04.2016
+ */
 #include <QApplication>
 #include "GUI.hpp"
 
