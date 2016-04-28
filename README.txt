@@ -1,4 +1,5 @@
 ICP 2016 - Reversi/Othello
+https://github.com/mrc0mmand/ICP-Reversi
 
 ## Basic info
 Main goal of this project was implementation of a 'game engine' for game

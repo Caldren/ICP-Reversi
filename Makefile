@@ -13,5 +13,10 @@ doxygen:
 
 run:
 	# Yet another hack for our school server
+ifndef DEBUG
 	cp conf/qt.conf .
+else
+	$(RM) qt.conf
+endif
+	./hra2016-cli &
 	./hra2016
