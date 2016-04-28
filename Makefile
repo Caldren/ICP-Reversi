@@ -5,11 +5,13 @@ all:
 	cd src/ && $(MAKE) all
 
 clean:
-	$(RM) -r doc/*
+	$(RM) -r doc/* qt.conf
 	cd src/ && $(MAKE) clean
 
 doxygen:
 	doxygen conf/doxygen.conf
 
 run:
+	# Yet another hack for our school server
+	cp conf/qt.conf .
 	./hra2016
