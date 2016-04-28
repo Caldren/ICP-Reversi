@@ -1,3 +1,10 @@
+/**
+ * @file Color.cpp
+ * @brief Implementation file of Color class.
+ *
+ * @author Frantisek Sumsal <xsumsa01@stud.fit.vutbr.cz>
+ * @date 28.04.2016
+ */
 #include <stdexcept>
 #include "Color.hpp"
 
@@ -19,11 +26,6 @@ void Color::setColor(int color)
 int Color::getColor()
 {
     return m_color;
-}
-
-bool Color::isValid()
-{
-    return Color::isValid(m_color);
 }
 
 bool Color::isValid(int color)

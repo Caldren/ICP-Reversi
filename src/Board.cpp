@@ -1,3 +1,10 @@
+/**
+ * @file Board.cpp
+ * @brief Implementation file of Board class.
+ *
+ * @author Frantisek Sumsal <xsumsa01@stud.fit.vutbr.cz>
+ * @date 28.04.2016
+ */
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>

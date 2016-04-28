@@ -1,3 +1,10 @@
+/**
+ * @file Game.cpp
+ * @brief Implementation file of Game class.
+ *
+ * @author Frantisek Sumsal <xsumsa01@stud.fit.vutbr.cz>
+ * @date 28.04.2016
+ */
 #include <iostream>
 #include <algorithm>
 #include <vector>
@@ -11,7 +18,6 @@
 Game::Game(int size)
 {
     m_board = new Board(size);
-    m_size = size;
 }
 
 Game::Game(const std::string &filename)
@@ -298,7 +304,6 @@ bool Game::load(const std::string &filename, std::string &error)
         size = stoi(input);
 
         m_board = new Board(size);
-        m_size = size;
 
         for(unsigned int i = 0; i < 2; i++) {
             std::getline(in, input, '\t');

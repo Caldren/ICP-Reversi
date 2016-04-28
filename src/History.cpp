@@ -1,3 +1,10 @@
+/**
+ * @file History.cpp
+ * @brief Implementation file of History class.
+ *
+ * @author Frantisek Sumsal <xsumsa01@stud.fit.vutbr.cz>
+ * @date 28.04.2016
+ */
 #include <string>
 #include <fstream>
 #include <stdexcept>

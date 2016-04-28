@@ -1,3 +1,10 @@
+/**
+ * @file GUI.cpp
+ * @brief Implementation file of GUI class.
+ *
+ * @author Frantisek Sumsal <xsumsa01@stud.fit.vutbr.cz>
+ * @date 28.04.2016
+ */
 #include <QMainWindow>
 #include <QApplication>
 #include <QMenuBar>

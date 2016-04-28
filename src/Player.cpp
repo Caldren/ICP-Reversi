@@ -1,3 +1,10 @@
+/**
+ * @file Player.cpp
+ * @brief Implementation file of Player class.
+ *
+ * @author Frantisek Sumsal <xsumsa01@stud.fit.vutbr.cz>
+ * @date 28.04.2016
+ */
 #include <stdexcept>
 #include <algorithm>
 #include "Player.hpp"
